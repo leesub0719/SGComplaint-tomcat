@@ -10,7 +10,7 @@
 
 | 환경 | 주요 로그 |
 |---|---|
-| Linux 패키지/systemd | `journalctl -u tomcat11`, `CATALINA_BASE/logs/catalina.out` |
+| Linux 패키지/systemd | `journalctl -u tomcat10`, `CATALINA_BASE/logs/catalina.out` |
 | Tomcat 공통 | `logs/catalina.YYYY-MM-DD.log`, `logs/localhost.YYYY-MM-DD.log` |
 | HTTP 요청 | AccessLogValve를 켠 경우 `logs/localhost_access_log.YYYY-MM-DD.txt` |
 | Windows 서비스 | `CATALINA_BASE/logs`, Windows 이벤트 뷰어, 서비스 stdout/stderr 설정 경로 |
@@ -32,7 +32,7 @@
 ## 2. 시작 중 500 또는 Context 시작 실패
 
 ```bash
-journalctl -u tomcat11 --since "10 minutes ago" --no-pager
+journalctl -u tomcat10 --since "10 minutes ago" --no-pager
 grep -R "Caused by:" /opt/tomcat/logs
 ```
 

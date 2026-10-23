@@ -21,8 +21,13 @@ $ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $TomcatRoot = (Resolve-Path -LiteralPath $TomcatHome).Path
 $WebApps = Join-Path $TomcatRoot 'webapps'
 
-if (-not (Test-Path -LiteralPath (Join-Path $TomcatRoot 'bin\catalina.bat'))) {
-    throw "Tomcat 11 경로가 아닙니다: $TomcatRoot"
+${CatalinaCommand} = Join-Path $TomcatRoot 'bin\catalina.bat'
+if (-not (Test-Path -LiteralPath $CatalinaCommand)) {
+    throw "Tomcat 10.1 경로가 아닙니다: $TomcatRoot"
+}
+$TomcatVersion = (& $CatalinaCommand version 2>&1 | Out-String)
+if ($LASTEXITCODE -ne 0 -or $TomcatVersion -notmatch 'Apache Tomcat/10\.1\.') {
+    throw "Tomcat 10.1.x만 지원합니다. 확인된 경로: $TomcatRoot"
 }
 if (-not (Test-Path -LiteralPath $WebApps -PathType Container)) {
     throw "Tomcat webapps 디렉터리가 없습니다: $WebApps"

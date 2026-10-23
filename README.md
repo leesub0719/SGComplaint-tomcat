@@ -1,7 +1,7 @@
 # SGComplaint Tomcat
 
 서경운수 민원 관리 기능을 **Spring MVC + Thymeleaf + JavaScript + REST API + MyBatis**로 구성하고,
-Spring Boot 내장 서버가 아닌 **외부 Apache Tomcat 11**에 WAR로 배포·운영하는 프로젝트입니다.
+Spring Boot 내장 서버가 아닌 **외부 Apache Tomcat 10.1**에 WAR로 배포·운영하는 프로젝트입니다.
 
 ## 프로젝트 목적
 
@@ -43,29 +43,34 @@ Context Path가 되므로 `sgcomplaint.war`는 `/sgcomplaint`로 서비스됩니
 ## 요구 환경
 
 - Java 17
-- Apache Tomcat 11.x
+- Apache Tomcat 10.1.25 이상
 - MySQL 8.x
 - Gradle Wrapper(저장소 포함)
 
-Tomcat 10 이하에는 배포하지 않습니다. 이 프로젝트는 Spring Boot 4/Jakarta Servlet API를
-사용하므로 Tomcat 11을 기준으로 검증합니다.
+이 프로젝트의 외부 서버 검증 기준은 **Tomcat 10.1.x + Dynamic Web Module 6.0**입니다.
+Tomcat 9/10.0/11 또는 Dynamic Web Module 5.0/6.1을 대상 런타임으로 선택하지 않습니다.
 
 ## Eclipse 개발 서버 실행
 
 이 프로젝트는 Gradle의 `eclipse-wtp` 설정으로 Eclipse Dynamic Web Module을 생성합니다.
-기존에 일반 Gradle 프로젝트로 가져왔다면 Eclipse 작업공간에서 프로젝트만 제거하되
-디스크의 소스는 삭제하지 말고, `File > Import > Gradle > Existing Gradle Project`로 다시
-가져옵니다. 이후 아래 항목을 확인합니다.
+최초 clone 뒤 Eclipse를 닫은 상태에서 프로젝트 루트의 PowerShell로 아래 명령을 한 번 실행합니다.
 
-1. `Project Facets`: Java 17, Dynamic Web Module 6.1
-2. `Targeted Runtimes`: Apache Tomcat 11
+```powershell
+.\gradlew.bat eclipse
+```
+
+기존에 일반 Gradle 프로젝트로 가져왔다면 Eclipse 작업공간에서 프로젝트만 제거하되
+디스크의 소스는 삭제하지 말고, 위 명령 실행 후 `File > Import > Gradle > Existing Gradle Project`로
+다시 가져옵니다. 이후 아래 항목을 확인합니다.
+
+1. `Project Facets`: Java 17, Dynamic Web Module 6.0
+2. `Targeted Runtimes`: Apache Tomcat 10.1
 3. `Web Project Settings`: Context Root `sgcomplaint`
 4. Tomcat Launch Configuration 환경변수:
    `SPRING_PROFILES_ACTIVE=local,tomcat`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`
 
 `Servers > Add and Remove`에서 `SGComplaint-tomcat`을 추가한 뒤 실행하면 개발 주소는
-`http://localhost:8080/sgcomplaint/`입니다. Tomcat 10 이하나 Dynamic Web Module 6.0
-이하를 선택하지 않습니다.
+`http://localhost:8080/sgcomplaint/`입니다.
 
 ## 빌드와 로컬 검증
 
@@ -87,7 +92,7 @@ WAR 내부에는 애플리케이션 클래스와 Thymeleaf 템플릿이 `WEB-INF
 
 ## 외부 Tomcat 빠른 배포
 
-1. Tomcat 11 전용 서비스 계정을 만들고 JDK 17을 연결합니다.
+1. Tomcat 10.1 전용 서비스 계정을 만들고 JDK 17을 연결합니다.
 2. `deploy/tomcat/setenv.*.example`을 참고해 환경변수를 설정합니다.
 3. 필요 시 `deploy/tomcat/sgcomplaint.xml.example`을
    `conf/Catalina/localhost/sgcomplaint.xml`로 복사합니다.
@@ -98,14 +103,14 @@ Windows 서비스 배포 예시:
 
 ```powershell
 .\deploy\windows\deploy-tomcat.ps1 `
-  -TomcatHome 'C:\apache-tomcat-11' `
-  -TomcatServiceName 'Tomcat11'
+  -TomcatHome 'C:\apache-tomcat-10.1' `
+  -TomcatServiceName 'Tomcat10'
 ```
 
 Linux systemd 배포 예시:
 
 ```bash
-TOMCAT_HOME=/opt/tomcat TOMCAT_SERVICE=tomcat11 \
+TOMCAT_HOME=/opt/tomcat TOMCAT_SERVICE=tomcat10 \
   ./deploy/linux/deploy-tomcat.sh
 ```
 

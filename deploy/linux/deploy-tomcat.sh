@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TOMCAT_HOME="${TOMCAT_HOME:-/opt/tomcat}"
-TOMCAT_SERVICE="${TOMCAT_SERVICE:-tomcat11}"
+TOMCAT_SERVICE="${TOMCAT_SERVICE:-tomcat10}"
 APP_CONTEXT="${APP_CONTEXT:-sgcomplaint}"
 WAR_PATH="${WAR_PATH:-$PROJECT_ROOT/build/libs/sgcomplaint.war}"
 HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:8080/$APP_CONTEXT/actuator/health}"
@@ -18,7 +18,15 @@ WEBAPPS_DIR="$TOMCAT_HOME/webapps"
 TARGET_WAR="$WEBAPPS_DIR/$APP_CONTEXT.war"
 EXPLODED_DIR="$WEBAPPS_DIR/$APP_CONTEXT"
 
-[[ -x "$TOMCAT_HOME/bin/catalina.sh" ]] || { echo "Tomcat 11 경로가 아닙니다: $TOMCAT_HOME" >&2; exit 2; }
+[[ -x "$TOMCAT_HOME/bin/catalina.sh" ]] || { echo "Tomcat 10.1 경로가 아닙니다: $TOMCAT_HOME" >&2; exit 2; }
+tomcat_version="$("$TOMCAT_HOME/bin/catalina.sh" version 2>&1)" || {
+  echo "Tomcat 버전을 확인할 수 없습니다: $TOMCAT_HOME" >&2
+  exit 2
+}
+grep -q 'Apache Tomcat/10\.1\.' <<< "$tomcat_version" || {
+  echo "Tomcat 10.1.x만 지원합니다: $TOMCAT_HOME" >&2
+  exit 2
+}
 [[ -d "$WEBAPPS_DIR" ]] || { echo "webapps 디렉터리가 없습니다: $WEBAPPS_DIR" >&2; exit 2; }
 
 if [[ "$SKIP_BUILD" != "true" ]]; then

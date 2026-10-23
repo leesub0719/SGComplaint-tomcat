@@ -41,7 +41,10 @@ jobs:
           jar tf build/libs/sgcomplaint.war > build/war-contents.txt
           grep -q '^WEB-INF/classes/com/transit/SGComplaint/SGComplaintApplication.class$' build/war-contents.txt
           grep -q '^WEB-INF/classes/templates/' build/war-contents.txt
-          grep -q '^WEB-INF/lib-provided/.*tomcat.*\.jar$' build/war-contents.txt
+          grep -Eq '^WEB-INF/lib-provided/tomcat-embed-core-10\.1\.[^/]*\.jar$' build/war-contents.txt
+          grep -q '^WEB-INF/lib/spring-boot-3.5.16.jar$' build/war-contents.txt
+          ! grep -Eq '^WEB-INF/lib-provided/tomcat-embed-.*-11\.' build/war-contents.txt
+          ! grep -Eq '^WEB-INF/lib/spring-boot(-[^/]*)?-4\.' build/war-contents.txt
 
       - name: Upload deployable WAR
         uses: actions/upload-artifact@v4

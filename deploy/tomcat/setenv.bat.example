@@ -1,6 +1,6 @@
 @echo off
 rem startup.bat/catalina.bat로 실행할 때 TOMCAT_HOME\bin\setenv.bat로 복사합니다.
-rem Windows 서비스는 이 파일을 읽지 않으므로 시스템 환경변수 또는 tomcat11w.exe를 사용하세요.
+rem Windows 서비스는 이 파일을 읽지 않으므로 시스템 환경변수 또는 tomcat10w.exe를 사용하세요.
 rem 실제 비밀값이 들어간 setenv.bat는 Git에 커밋하지 않습니다.
 
 set "SPRING_PROFILES_ACTIVE=prod,tomcat"

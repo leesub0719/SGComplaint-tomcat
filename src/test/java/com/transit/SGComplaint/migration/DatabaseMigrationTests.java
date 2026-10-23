@@ -53,7 +53,7 @@ class DatabaseMigrationTests {
                 .withUserConfiguration(com.transit.SGComplaint.config.DatabaseMigrationConfiguration.class)
                 .withPropertyValues("spring.flyway.enabled=true", "app.database.expected-name=sgcomplaint")
                 .run(context -> assertNotNull(context.getBean(
-                        org.springframework.boot.flyway.autoconfigure.FlywayMigrationStrategy.class)));
+                        org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy.class)));
     }
 
     @Test void baselineMatchesUserProvidedLegacyDefinitions() {

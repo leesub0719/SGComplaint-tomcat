@@ -1,8 +1,8 @@
-# 외부 Tomcat 11 설치와 설정
+# 외부 Tomcat 10.1 설치와 설정
 
 ## 1. 설치 기준
 
-- JDK 17과 Tomcat 11을 전용 서비스 계정으로 실행합니다.
+- JDK 17과 Tomcat 10.1을 전용 서비스 계정으로 실행합니다.
 - `CATALINA_HOME`은 Tomcat 프로그램, `CATALINA_BASE`는 설정·로그·배포 파일로 분리할 수 있습니다.
 - Manager/Host Manager 예제 애플리케이션은 운영에서 제거하거나 외부 접근을 차단합니다.
 - Tomcat 관리 포트는 인터넷에 직접 공개하지 않고 Nginx/IIS 같은 리버스 프록시 뒤에 둡니다.
@@ -33,7 +33,7 @@ sudo editor /opt/tomcat/bin/setenv.sh
 ```
 
 Windows에서 `startup.bat`로 실행할 때만 `setenv.bat`가 적용됩니다. Windows 서비스는
-`tomcat11w.exe` 또는 시스템 환경변수에 같은 값을 설정하고 서비스를 재시작해야 합니다.
+`tomcat10w.exe` 또는 시스템 환경변수에 같은 값을 설정하고 서비스를 재시작해야 합니다.
 
 ## 3. Context Path
 

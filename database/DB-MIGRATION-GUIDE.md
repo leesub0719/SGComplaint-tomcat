@@ -52,7 +52,7 @@ Remove-Item Env:DB_PASSWORD
 
 ## 2. 기존 운영 DB 최초 적용
 
-전제: 외부 Tomcat 11 서비스는 tomcat11이며, 운영 환경변수와 업로드 경로가
+전제: 외부 Tomcat 10.1 서비스는 tomcat10이며, 운영 환경변수와 업로드 경로가
 `deploy/tomcat/setenv.sh.example` 기준으로 설정되어 있습니다.
 DB 도구는 운영 서버에 임의 스크립트를 복사하지 않고 검증된 릴리스 작업공간의 Gradle task로 실행합니다.
 
@@ -60,7 +60,7 @@ DB 도구는 운영 서버에 임의 스크립트를 복사하지 않고 검증�
 2. Tomcat 서비스를 중지합니다.
 
 ```bash
-sudo systemctl stop tomcat11
+sudo systemctl stop tomcat10
 ```
 
 3. 검증된 릴리스 작업공간에서 운영 DB 환경변수를 주입합니다. 비밀번호는 명령 이력이나 파일에 남기지 않습니다.
@@ -93,10 +93,10 @@ DB_MIGRATION_ENABLED=true
 7. 테스트를 통과한 WAR를 배포 스크립트로 반영하고 상태를 확인합니다.
 
 ```bash
-TOMCAT_HOME=/opt/tomcat TOMCAT_SERVICE=tomcat11 \
+TOMCAT_HOME=/opt/tomcat TOMCAT_SERVICE=tomcat10 \
   ./deploy/linux/deploy-tomcat.sh
-sudo systemctl status tomcat11 --no-pager -l
-sudo journalctl -u tomcat11 -n 100 --no-pager
+sudo systemctl status tomcat10 --no-pager -l
+sudo journalctl -u tomcat10 -n 100 --no-pager
 ```
 
 한 번 기준 등록과 활성화를 끝내면, 다음 배포부터는 새 WAR 안의 미적용 버전 SQL이 시작 시 자동 실행됩니다.

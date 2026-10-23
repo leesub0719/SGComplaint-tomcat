@@ -17,6 +17,9 @@ class CicdConfigurationTests {
         String workflow = read(".github/workflows/war-ci.yml");
         assertTrue(workflow.contains("clean test bootWar"));
         assertTrue(workflow.contains("WEB-INF/lib-provided/"));
+        assertTrue(workflow.contains("tomcat-embed-core-10\\.1\\."));
+        assertTrue(workflow.contains("spring-boot-3.5.16.jar"));
+        assertTrue(workflow.contains("tomcat-embed-.*-11"));
         assertTrue(workflow.contains("actions/upload-artifact@v4"));
         assertTrue(workflow.contains("build/libs/sgcomplaint.war"));
     }
@@ -37,6 +40,7 @@ class CicdConfigurationTests {
         assertTrue(linux.contains("build/libs/sgcomplaint.war"));
         assertTrue(linux.contains("backup/tomcat"));
         assertTrue(linux.contains("actuator/health"));
+        assertTrue(linux.contains("Apache Tomcat/10\\.1\\."));
         assertTrue(linux.contains("realpath"));
         assertFalse(linux.contains("eval "));
         assertFalse(linux.contains("source "));
@@ -46,6 +50,7 @@ class CicdConfigurationTests {
         assertTrue(windows.contains("build\\libs\\sgcomplaint.war"));
         assertTrue(windows.contains("backup\\tomcat"));
         assertTrue(windows.contains("actuator/health"));
+        assertTrue(windows.contains("Apache Tomcat/10\\.1\\."));
         assertTrue(windows.contains("StartsWith($WebAppsFull"));
     }
 
