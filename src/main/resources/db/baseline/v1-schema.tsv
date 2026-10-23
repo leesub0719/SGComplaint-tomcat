@@ -1,0 +1,183 @@
+# V1 contract: kind, table, and structure fields (tab separated).
+# Non-unique extra indexes and collation-name differences are permitted; other schema differences block baseline.
+T	sgtransit_employee	innodb
+C	sgtransit_employee	emp_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_employee	emp_id	varchar(50)	NO	<NULL>		utf8mb4
+C	sgtransit_employee	emp_password	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_employee	emp_name	varchar(50)	NO	<NULL>		utf8mb4
+C	sgtransit_employee	emp_email	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_employee	emp_phone	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_employee	emp_address	varchar(255)	YES	<NULL>		utf8mb4
+C	sgtransit_employee	emp_role	char(1)	NO	U		utf8mb4
+C	sgtransit_employee	emp_status	char(1)	NO	Y		utf8mb4
+C	sgtransit_employee	created_at	datetime	NO	current_timestamp		-
+C	sgtransit_employee	updated_at	datetime	NO	current_timestamp	on update current_timestamp	-
+I	sgtransit_employee	PRIMARY	emp_no
+I	sgtransit_employee	UNIQUE	emp_id
+I	sgtransit_employee	UNIQUE	emp_email
+T	sgtransit_signup_consent	innodb
+C	sgtransit_signup_consent	consent_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_signup_consent	emp_no	bigint	NO	<NULL>		-
+C	sgtransit_signup_consent	terms_version	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_signup_consent	privacy_version	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_signup_consent	terms_agreed_at	datetime	NO	<NULL>		-
+C	sgtransit_signup_consent	privacy_agreed_at	datetime	NO	<NULL>		-
+C	sgtransit_signup_consent	age_confirmed_at	datetime	NO	<NULL>		-
+C	sgtransit_signup_consent	created_at	datetime	NO	current_timestamp		-
+I	sgtransit_signup_consent	PRIMARY	consent_no
+I	sgtransit_signup_consent	INDEX	emp_no
+F	sgtransit_signup_consent	emp_no	sgtransit_employee	emp_no	RESTRICT	RESTRICT
+T	sgtransit_phone_verification	innodb
+C	sgtransit_phone_verification	verification_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_phone_verification	phone	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_phone_verification	challenge_scope	char(64)	YES	<NULL>		utf8mb4
+C	sgtransit_phone_verification	code_hash	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_phone_verification	verification_token_hash	char(64)	YES	<NULL>		utf8mb4
+C	sgtransit_phone_verification	failed_attempts	int	NO	0		-
+C	sgtransit_phone_verification	requested_at	datetime	NO	<NULL>		-
+C	sgtransit_phone_verification	code_expires_at	datetime	NO	<NULL>		-
+C	sgtransit_phone_verification	verified_at	datetime	YES	<NULL>		-
+C	sgtransit_phone_verification	token_expires_at	datetime	YES	<NULL>		-
+C	sgtransit_phone_verification	used_at	datetime	YES	<NULL>		-
+I	sgtransit_phone_verification	PRIMARY	verification_no
+I	sgtransit_phone_verification	UNIQUE	verification_token_hash
+I	sgtransit_phone_verification	INDEX	phone,requested_at
+T	sgtransit_complaint	innodb
+C	sgtransit_complaint	complaint_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_complaint	emp_no	bigint	NO	<NULL>		-
+C	sgtransit_complaint	emp_id	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint	emp_name	varchar(50)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint	emp_phone	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint	complaint_category	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint	complaint_title	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint	complaint_content	text	NO	<NULL>		utf8mb4
+C	sgtransit_complaint	complaint_password	varchar(100)	YES	<NULL>		utf8mb4
+C	sgtransit_complaint	complaint_status	varchar(20)	NO	CHECKING		utf8mb4
+C	sgtransit_complaint	created_at	datetime	NO	current_timestamp		-
+C	sgtransit_complaint	updated_at	datetime	NO	current_timestamp		-
+I	sgtransit_complaint	PRIMARY	complaint_no
+I	sgtransit_complaint	INDEX	emp_no
+I	sgtransit_complaint	INDEX	emp_no,created_at
+I	sgtransit_complaint	INDEX	complaint_status,created_at
+I	sgtransit_complaint	INDEX	complaint_category,created_at
+F	sgtransit_complaint	emp_no	sgtransit_employee	emp_no	RESTRICT	RESTRICT
+T	sgtransit_complaint_attachment	innodb
+C	sgtransit_complaint_attachment	attachment_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_complaint_attachment	complaint_no	bigint	NO	<NULL>		-
+C	sgtransit_complaint_attachment	original_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint_attachment	stored_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint_attachment	file_path	varchar(500)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint_attachment	content_type	varchar(100)	YES	<NULL>		utf8mb4
+C	sgtransit_complaint_attachment	file_size	bigint	NO	<NULL>		-
+C	sgtransit_complaint_attachment	created_at	datetime	NO	current_timestamp		-
+I	sgtransit_complaint_attachment	PRIMARY	attachment_no
+I	sgtransit_complaint_attachment	INDEX	complaint_no
+F	sgtransit_complaint_attachment	complaint_no	sgtransit_complaint	complaint_no	CASCADE	RESTRICT
+T	sgtransit_complaint_answer	innodb
+C	sgtransit_complaint_answer	answer_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_complaint_answer	complaint_no	bigint	NO	<NULL>		-
+C	sgtransit_complaint_answer	admin_emp_no	bigint	NO	<NULL>		-
+C	sgtransit_complaint_answer	admin_name	varchar(50)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint_answer	answer_content	text	NO	<NULL>		utf8mb4
+C	sgtransit_complaint_answer	created_at	datetime	NO	current_timestamp		-
+C	sgtransit_complaint_answer	updated_at	datetime	NO	current_timestamp		-
+I	sgtransit_complaint_answer	PRIMARY	answer_no
+I	sgtransit_complaint_answer	UNIQUE	complaint_no
+I	sgtransit_complaint_answer	INDEX	admin_emp_no
+F	sgtransit_complaint_answer	complaint_no	sgtransit_complaint	complaint_no	CASCADE	RESTRICT
+F	sgtransit_complaint_answer	admin_emp_no	sgtransit_employee	emp_no	RESTRICT	RESTRICT
+T	sgtransit_complaint_answer_attachment	innodb
+C	sgtransit_complaint_answer_attachment	answer_attachment_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_complaint_answer_attachment	answer_no	bigint	NO	<NULL>		-
+C	sgtransit_complaint_answer_attachment	original_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint_answer_attachment	stored_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint_answer_attachment	file_path	varchar(500)	NO	<NULL>		utf8mb4
+C	sgtransit_complaint_answer_attachment	content_type	varchar(100)	YES	<NULL>		utf8mb4
+C	sgtransit_complaint_answer_attachment	file_size	bigint	NO	<NULL>		-
+C	sgtransit_complaint_answer_attachment	created_at	datetime	NO	current_timestamp		-
+I	sgtransit_complaint_answer_attachment	PRIMARY	answer_attachment_no
+I	sgtransit_complaint_answer_attachment	INDEX	answer_no
+F	sgtransit_complaint_answer_attachment	answer_no	sgtransit_complaint_answer	answer_no	CASCADE	RESTRICT
+T	sgtransit_main_banner	innodb
+C	sgtransit_main_banner	banner_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_main_banner	original_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_main_banner	stored_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_main_banner	file_path	varchar(500)	NO	<NULL>		utf8mb4
+C	sgtransit_main_banner	content_type	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_main_banner	file_size	bigint	NO	<NULL>		-
+C	sgtransit_main_banner	display_order	int	NO	<NULL>		-
+C	sgtransit_main_banner	created_by	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_main_banner	created_at	datetime	NO	current_timestamp		-
+I	sgtransit_main_banner	PRIMARY	banner_no
+I	sgtransit_main_banner	INDEX	display_order,banner_no
+T	sgtransit_notice	innodb
+C	sgtransit_notice	notice_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_notice	admin_emp_no	bigint	NO	<NULL>		-
+C	sgtransit_notice	admin_name	varchar(50)	NO	<NULL>		utf8mb4
+C	sgtransit_notice	notice_category	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_notice	notice_title	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_notice	notice_content	text	NO	<NULL>		utf8mb4
+C	sgtransit_notice	is_pinned	char(1)	NO	N		utf8mb4
+C	sgtransit_notice	is_popup	char(1)	NO	N		utf8mb4
+C	sgtransit_notice	view_count	bigint	NO	0		-
+C	sgtransit_notice	created_at	datetime	NO	current_timestamp		-
+C	sgtransit_notice	updated_at	datetime	NO	current_timestamp		-
+I	sgtransit_notice	PRIMARY	notice_no
+I	sgtransit_notice	INDEX	is_pinned,created_at
+I	sgtransit_notice	INDEX	is_popup,created_at
+F	sgtransit_notice	admin_emp_no	sgtransit_employee	emp_no	RESTRICT	RESTRICT
+T	sgtransit_notice_image	innodb
+C	sgtransit_notice_image	notice_image_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_notice_image	notice_no	bigint	NO	<NULL>		-
+C	sgtransit_notice_image	original_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_notice_image	stored_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_notice_image	file_path	varchar(500)	NO	<NULL>		utf8mb4
+C	sgtransit_notice_image	content_type	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_notice_image	file_size	bigint	NO	<NULL>		-
+C	sgtransit_notice_image	created_at	datetime	NO	current_timestamp		-
+I	sgtransit_notice_image	PRIMARY	notice_image_no
+I	sgtransit_notice_image	INDEX	notice_no
+F	sgtransit_notice_image	notice_no	sgtransit_notice	notice_no	CASCADE	RESTRICT
+T	sgtransit_partner	innodb
+C	sgtransit_partner	partner_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_partner	partner_name	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_partner	partner_phone	varchar(30)	NO	<NULL>		utf8mb4
+C	sgtransit_partner	partner_site	varchar(500)	NO			utf8mb4
+C	sgtransit_partner	partner_notes	text	NO	<NULL>		utf8mb4
+C	sgtransit_partner	partner_status	char(1)	NO	Y		utf8mb4
+C	sgtransit_partner	created_at	datetime	NO	current_timestamp		-
+C	sgtransit_partner	updated_at	datetime	NO	current_timestamp		-
+I	sgtransit_partner	PRIMARY	partner_no
+I	sgtransit_partner	INDEX	partner_name
+I	sgtransit_partner	INDEX	partner_status,created_at
+I	sgtransit_partner	INDEX	created_at
+T	sgtransit_route_operation	innodb
+C	sgtransit_route_operation	route_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_route_operation	route_type	varchar(20)	NO	<NULL>		utf8mb4
+C	sgtransit_route_operation	bus_name	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_route_operation	terminal_info	varchar(200)	NO	<NULL>		utf8mb4
+C	sgtransit_route_operation	dispatch_interval	varchar(200)	NO	<NULL>		utf8mb4
+C	sgtransit_route_operation	inquiry_phone	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_route_operation	route_url	varchar(500)	NO	<NULL>		utf8mb4
+C	sgtransit_route_operation	route_status	char(1)	NO	Y		utf8mb4
+C	sgtransit_route_operation	created_at	datetime	NO	current_timestamp		-
+C	sgtransit_route_operation	updated_at	datetime	NO	current_timestamp		-
+I	sgtransit_route_operation	PRIMARY	route_no
+I	sgtransit_route_operation	INDEX	route_type,route_status,route_no
+I	sgtransit_route_operation	INDEX	route_status,route_no
+T	sgtransit_ddokbus_guide_image	innodb
+C	sgtransit_ddokbus_guide_image	image_no	bigint	NO	<NULL>	auto_increment	-
+C	sgtransit_ddokbus_guide_image	original_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_ddokbus_guide_image	stored_name	varchar(255)	NO	<NULL>		utf8mb4
+C	sgtransit_ddokbus_guide_image	file_path	varchar(500)	NO	<NULL>		utf8mb4
+C	sgtransit_ddokbus_guide_image	content_type	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_ddokbus_guide_image	file_size	bigint	NO	<NULL>		-
+C	sgtransit_ddokbus_guide_image	created_at	datetime	NO	current_timestamp		-
+I	sgtransit_ddokbus_guide_image	PRIMARY	image_no
+I	sgtransit_ddokbus_guide_image	INDEX	image_no
+T	sgtransit_abuse_limit	innodb
+C	sgtransit_abuse_limit	bucket_key	varchar(100)	NO	<NULL>		utf8mb4
+C	sgtransit_abuse_limit	hits	int	NO	0		-
+C	sgtransit_abuse_limit	reset_at	datetime	NO	<NULL>		-
+I	sgtransit_abuse_limit	PRIMARY	bucket_key
+I	sgtransit_abuse_limit	INDEX	reset_at

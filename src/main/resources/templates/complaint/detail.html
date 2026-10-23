@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="app-context-path" content="/" th:content="@{/}">
+    <title th:text="${complaint.title + ' | (주) 서경 마을버스'}">민원 상세</title>
+    <link rel="stylesheet" href="../../static/css/complaint-detail.css" th:href="@{/css/complaint-detail.css}">
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <script src="../../static/js/app-context.js" th:src="@{/js/app-context.js}" defer></script>
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+    <script src="../../static/js/complaint-detail.js" th:src="@{/js/complaint-detail.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<th:block th:if="${complaint.categoryCode == 'PRAISE'}">
+    <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/praise-detail-hero.png', '칭찬합니다')}"></section>
+</th:block>
+<th:block th:if="${complaint.categoryCode == 'COMPLAINT'}">
+    <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/inconvenience-detail-hero.png', '불편합니다')}"></section>
+</th:block>
+<th:block th:if="${complaint.categoryCode == 'LOST'}">
+    <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/lost-property-detail-hero.png', '분실물 문의')}"></section>
+</th:block>
+<main class="detail-page">
+    <article class="detail-card">
+        <div class="detail-labels">
+            <span class="detail-category" th:text="${complaint.categoryLabel}">불편합니다</span>
+            <span class="detail-status" th:classappend="${'status-' + #strings.toLowerCase(complaint.statusCode)}" th:text="${complaint.statusLabel}">확인중</span>
+        </div>
+        <h1 th:text="${complaint.title}">민원 제목</h1>
+        <dl class="detail-meta">
+            <div><dt>민원번호</dt><dd th:text="${complaint.complaintNo}">1</dd></div>
+            <div><dt>작성자</dt><dd th:text="${complaint.maskedWriterName}">홍**</dd></div>
+            <div><dt>등록일</dt><dd th:text="${complaint.registeredDateTime}">2026.08.21 12:00</dd></div>
+        </dl>
+        <section class="detail-content" aria-labelledby="content-title">
+            <h2 id="content-title">민원 내용</h2>
+            <div class="rich-content" data-contextual-content
+                 th:utext="${complaint.content}">민원 내용</div>
+        </section>
+        <section class="detail-answer" aria-labelledby="answer-title">
+            <div class="answer-heading">
+                <div>
+                    <h2 id="answer-title">관리자 답변</h2>
+                </div>
+                <p th:if="${!#strings.isEmpty(complaint.answerContent)}">
+                    <time th:text="${complaint.answeredDateTime}">2026.08.24 12:00</time>
+                </p>
+            </div>
+            <div class="answer-content" th:if="${!#strings.isEmpty(complaint.answerContent)}"
+                 th:text="${complaint.answerContent}">관리자 답변 내용</div>
+            <p class="answer-waiting" th:if="${#strings.isEmpty(complaint.answerContent)}">
+                담당자가 민원 내용을 확인하고 있습니다. 답변이 등록되면 이곳에서 확인할 수 있습니다.
+            </p>
+            <div class="answer-files" th:if="${!#lists.isEmpty(complaint.answerAttachments)}">
+                <h3>답변 첨부파일</h3>
+                <a th:each="file : ${complaint.answerAttachments}" th:href="@{${file.downloadUrl}}">
+                    <span aria-hidden="true">↓</span>
+                    <strong th:text="${file.originalName}">답변 첨부파일.pdf</strong>
+                    <small th:text="${file.formattedSize}">1 MB</small>
+                </a>
+            </div>
+        </section>
+        <section class="detail-files" th:if="${!#lists.isEmpty(complaint.attachments)}" aria-labelledby="file-title">
+            <h2 id="file-title">민원 첨부파일</h2>
+            <a th:each="file : ${complaint.attachments}" th:href="@{${file.downloadUrl}}">
+                <span aria-hidden="true">↓</span>
+                <strong th:text="${file.originalName}">첨부파일.pdf</strong>
+                <small th:text="${file.formattedSize}">1 MB</small>
+            </a>
+        </section>
+        <div class="detail-owner" th:if="${canEdit}" th:attr="data-complaint-no=${complaint.complaintNo}">
+            <div class="detail-owner-buttons">
+                <button id="detail-edit-open" type="button">수정</button>
+                <button id="detail-delete" type="button" class="danger">삭제</button>
+            </div>
+            <form id="detail-edit-form" class="detail-edit-form" hidden>
+                <label for="detail-edit-category">분류</label>
+                <select id="detail-edit-category" required>
+                    <option value="PRAISE" th:selected="${complaint.categoryCode == 'PRAISE'}">칭찬합니다</option>
+                    <option value="COMPLAINT" th:selected="${complaint.categoryCode == 'COMPLAINT'}">불편합니다</option>
+                    <option value="LOST" th:selected="${complaint.categoryCode == 'LOST'}">분실물 문의</option>
+                </select>
+                <label for="detail-edit-title">제목</label>
+                <input id="detail-edit-title" th:value="${complaint.title}" maxlength="100" required>
+                <label for="detail-edit-content">내용</label>
+                <div id="detail-edit-content" class="detail-edit-content" contenteditable="true"
+                     role="textbox" aria-multiline="true" data-contextual-content
+                     th:utext="${complaint.content}"></div>
+                <div class="detail-edit-buttons">
+                    <button id="detail-edit-cancel" type="button">취소</button>
+                    <button id="detail-edit-save" type="submit">수정 완료</button>
+                </div>
+            </form>
+            <p id="detail-action-message" class="detail-action-message" role="alert" hidden></p>
+        </div>
+        <div class="detail-actions"><a href="/complaints" th:href="@{/complaints}">목록으로 돌아가기</a></div>
+    </article>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

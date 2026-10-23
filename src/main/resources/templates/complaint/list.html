@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="(주) 서경 마을버스 공개 민원 게시판">
+    <meta name="app-context-path" content="/" th:content="@{/}">
+    <title>민원 게시판 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/complaint-list.css" th:href="@{/css/complaint-list.css}">
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <script src="../../static/js/app-context.js" th:src="@{/js/app-context.js}" defer></script>
+    <script src="../../static/js/complaint-list.js" th:src="@{/js/complaint-list.js}" defer></script>
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#complaint-board">민원 목록으로 바로가기</a>
+
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<th:block th:if="${selectedCategory == 'PRAISE'}">
+    <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/praise-hero.png', '칭찬합니다')}"></section>
+</th:block>
+<th:block th:if="${selectedCategory == 'COMPLAINT'}">
+    <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/inconvenience-hero.png', '불편합니다')}"></section>
+</th:block>
+<th:block th:if="${selectedCategory == 'LOST'}">
+    <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/lost-property-hero.png', '분실물 문의')}"></section>
+</th:block>
+<th:block th:if="${selectedCategory == 'ALL'}">
+    <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/complaints-all-hero.png', '고객의 소리')}"></section>
+</th:block>
+
+<main id="complaint-board" class="board-page">
+    <section class="board-intro" aria-labelledby="board-title">
+        <h1 id="board-title">고객의 소리를 들려주세요</h1>
+        <span>칭찬과 불편사항, 분실물 문의를 남겨주시면 담당자가 확인하겠습니다.</span>
+    </section>
+
+    <section class="board-card" aria-label="민원 게시판">
+        <div class="board-tools">
+            <nav class="category-tabs" aria-label="민원 분류">
+                <a th:classappend="${selectedCategory == 'ALL'} ? 'active'"
+                   th:href="@{/complaints(category='ALL',keyword=${keyword})}">전체</a>
+                <a th:classappend="${selectedCategory == 'PRAISE'} ? 'active'"
+                   th:href="@{/complaints(category='PRAISE',keyword=${keyword})}">칭찬합니다</a>
+                <a th:classappend="${selectedCategory == 'COMPLAINT'} ? 'active'"
+                   th:href="@{/complaints(category='COMPLAINT',keyword=${keyword})}">불편합니다</a>
+                <a th:classappend="${selectedCategory == 'LOST'} ? 'active'"
+                   th:href="@{/complaints(category='LOST',keyword=${keyword})}">분실물 문의</a>
+            </nav>
+            <form class="board-search" method="get" action="/complaints" th:action="@{/complaints}">
+                <input type="hidden" name="category" th:value="${selectedCategory}">
+                <label class="sr-only" for="board-keyword">제목 검색</label>
+                <input id="board-keyword" name="keyword" type="search" maxlength="100"
+                       th:value="${keyword}" placeholder="제목 앞부분을 검색하세요">
+                <button type="submit" aria-label="검색">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+                </button>
+            </form>
+        </div>
+
+        <div class="board-meta">
+            <p><b th:text="${boardTitle}">전체 민원</b> · 총 <strong th:text="${complaintPage.totalElements}">0</strong>건</p>
+            <span>게시글 내용은 등록한 비밀번호 확인 후 볼 수 있습니다.</span>
+        </div>
+
+        <div class="board-table-wrap">
+            <table class="board-table">
+                <caption class="sr-only">민원 번호, 분류, 진행상황, 제목, 작성자, 등록일 목록</caption>
+                <thead><tr><th>번호</th><th>분류</th><th>진행상황</th><th>제목</th><th>작성자</th><th>등록일</th></tr></thead>
+                <tbody>
+                <tr th:each="item : ${complaints}">
+                    <td th:text="${item.complaintNo}">1</td>
+                    <td><span class="category-label" th:classappend="${'category-' + #strings.toLowerCase(item.categoryCode)}" th:text="${item.categoryLabel}">불편합니다</span></td>
+                    <td><span class="complaint-status" th:classappend="${'status-' + #strings.toLowerCase(item.statusCode)}" th:text="${item.statusLabel}">확인중</span></td>
+                    <td class="title-cell">
+                        <button type="button" data-password-open
+                                th:attr="data-complaint-no=${item.complaintNo},data-complaint-title=${item.title}">
+                            <span class="lock-icon" th:if="${item.passwordProtected}" aria-hidden="true">🔒</span>
+                            <span th:text="${item.title}">민원 제목</span>
+                        </button>
+                    </td>
+                    <td th:text="${item.maskedWriterName}">홍**</td>
+                    <td th:text="${item.registeredDate}">2026.08.21</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(complaints)}">
+                    <td class="empty-row" colspan="6">검색 조건에 맞는 민원 게시글이 없습니다.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="board-footer">
+            <nav class="pagination" th:if="${complaintPage.totalPages > 0}" aria-label="페이지 이동">
+                <a class="page-arrow" th:classappend="${complaintPage.first} ? 'disabled'"
+                   th:href="${complaintPage.first} ? '#' : @{/complaints(category=${selectedCategory},keyword=${keyword},page=${complaintPage.number - 1})}"
+                   aria-label="이전 페이지">‹</a>
+                <a th:each="pageNumber : ${#numbers.sequence(T(java.lang.Math).max(0, complaintPage.number - 4), T(java.lang.Math).min(complaintPage.totalPages - 1, complaintPage.number + 4))}"
+                   th:text="${pageNumber + 1}"
+                   th:classappend="${pageNumber == complaintPage.number} ? 'active'"
+                   th:href="@{/complaints(category=${selectedCategory},keyword=${keyword},page=${pageNumber})}">1</a>
+                <a class="page-arrow" th:classappend="${complaintPage.last} ? 'disabled'"
+                   th:href="${complaintPage.last} ? '#' : @{/complaints(category=${selectedCategory},keyword=${keyword},page=${complaintPage.number + 1})}"
+                   aria-label="다음 페이지">›</a>
+            </nav>
+            <a class="write-button" href="/complaints/new"
+               th:href="@{/complaints/new(category=${selectedCategory})}">글쓰기</a>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+
+<div id="password-modal" class="password-modal" hidden aria-hidden="true">
+    <button class="modal-backdrop" type="button" data-password-close aria-label="팝업 닫기"></button>
+    <section class="password-dialog" role="dialog" aria-modal="true" aria-labelledby="password-title">
+        <button class="dialog-close" type="button" data-password-close aria-label="팝업 닫기">×</button>
+        <div class="password-icon" aria-hidden="true">🔒</div>
+        <h2 id="password-title">게시글 비밀번호 확인</h2>
+        <p id="selected-post-title">선택한 민원 제목</p>
+        <form id="password-form" method="post">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <label for="post-view-password">비밀번호</label>
+            <input id="post-view-password" name="password" type="password" maxlength="20"
+                   autocomplete="current-password" placeholder="등록한 비밀번호를 입력하세요" required>
+            <p id="password-message" class="password-message" aria-live="polite"></p>
+            <div class="dialog-actions">
+                <button type="button" class="cancel-button" data-password-close>취소</button>
+                <button type="submit" class="confirm-button">확인</button>
+            </div>
+        </form>
+    </section>
+</div>
+</body>
+</html>

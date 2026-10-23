@@ -1,0 +1,22 @@
+@echo off
+rem startup.bat/catalina.bat로 실행할 때 TOMCAT_HOME\bin\setenv.bat로 복사합니다.
+rem Windows 서비스는 이 파일을 읽지 않으므로 시스템 환경변수 또는 tomcat11w.exe를 사용하세요.
+rem 실제 비밀값이 들어간 setenv.bat는 Git에 커밋하지 않습니다.
+
+set "SPRING_PROFILES_ACTIVE=prod,tomcat"
+set "DB_URL=jdbc:mysql://127.0.0.1:3306/sgcomplaint?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8"
+set "DB_USERNAME=sgcomplaint_app"
+set "DB_PASSWORD=replace-me"
+set "REMEMBER_ME_KEY=replace-with-at-least-32-random-characters"
+
+set "SOLAPI_API_KEY="
+set "SOLAPI_API_SECRET="
+set "SOLAPI_SENDER="
+
+set "COMPLAINT_UPLOAD_DIR=C:\sgcomplaint-data\uploads\complaints"
+set "ANSWER_UPLOAD_DIR=C:\sgcomplaint-data\uploads\answers"
+set "NOTICE_IMAGE_UPLOAD_DIR=C:\sgcomplaint-data\uploads\notices"
+set "MAIN_BANNER_UPLOAD_DIR=C:\sgcomplaint-data\uploads\main-banners"
+set "DDOKBUS_GUIDE_DIR=C:\sgcomplaint-data\uploads\routes\ddokbus"
+
+set "CATALINA_OPTS=%CATALINA_OPTS% -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Seoul -XX:+ExitOnOutOfMemoryError"

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.PhoneVerificationRepository">
+  <resultMap id="verification" type="com.transit.SGComplaint.domain.PhoneVerification">
+    <id property="verificationNo" column="verification_no"/><result property="challengeScope" column="challenge_scope"/><result property="phone" column="phone"/><result property="codeHash" column="code_hash"/><result property="verificationTokenHash" column="verification_token_hash"/><result property="failedAttempts" column="failed_attempts"/><result property="requestedAt" column="requested_at"/><result property="codeExpiresAt" column="code_expires_at"/><result property="verifiedAt" column="verified_at"/><result property="tokenExpiresAt" column="token_expires_at"/><result property="usedAt" column="used_at"/>
+  </resultMap>
+  <sql id="columns">challenge_scope,verification_no,phone,code_hash,verification_token_hash,failed_attempts,requested_at,code_expires_at,verified_at,token_expires_at,used_at</sql>
+
+    <select id="findTopByPhoneOrderByRequestedAtDesc" resultMap="verification">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_phone_verification
+        WHERE phone=#{phone}
+          AND challenge_scope=#{scope}
+        ORDER BY requested_at DESC, verification_no DESC
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
+    <select id="findByPhoneAndVerificationTokenHashAndUsedAtIsNull" resultMap="verification">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_phone_verification
+        WHERE phone=#{phone}
+          AND challenge_scope=#{scope}
+          AND verification_token_hash=#{verificationTokenHash}
+          AND used_at IS NULL
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
+    <update id="invalidateScope">
+        UPDATE sgtransit_phone_verification
+        SET used_at = CURRENT_TIMESTAMP
+        WHERE phone = #{phone} AND challenge_scope = #{scope} AND used_at IS NULL
+    </update>
+
+    <insert id="insertVerification" useGeneratedKeys="true" keyProperty="verificationNo" keyColumn="verification_no">
+        INSERT INTO sgtransit_phone_verification (
+            phone,
+            challenge_scope,
+            code_hash,
+            verification_token_hash,
+            failed_attempts,
+            requested_at,
+            code_expires_at,
+            verified_at,
+            token_expires_at,
+            used_at
+        ) VALUES (
+            #{phone},
+            #{challengeScope},
+            #{codeHash},
+            #{verificationTokenHash},
+            #{failedAttempts},
+            #{requestedAt},
+            #{codeExpiresAt},
+            #{verifiedAt},
+            #{tokenExpiresAt},
+            #{usedAt}
+        )
+    </insert>
+
+    <update id="updateVerification">
+        UPDATE sgtransit_phone_verification
+        SET verification_token_hash=#{verificationTokenHash},
+            failed_attempts=#{failedAttempts},
+            verified_at=#{verifiedAt},
+            token_expires_at=#{tokenExpiresAt},
+            used_at=#{usedAt}
+        WHERE verification_no=#{verificationNo}
+    </update>
+</mapper>

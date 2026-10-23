@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민원 관리 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <script src="../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar('민원 관리', '접수 내용을 확인하고 답변과 처리상태를 관리합니다.')}"></header>
+        <main class="admin-content">
+            <div class="flash-message success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-message error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+            <section class="management-toolbar">
+                <nav class="filter-tabs" aria-label="민원 상태 필터">
+                    <a href="/admin/complaints" th:href="@{/admin/complaints}" th:classappend="${selectedStatus == 'ALL'} ? 'active'">전체</a>
+                    <a href="?status=CHECKING" th:href="@{/admin/complaints(status='CHECKING')}" th:classappend="${selectedStatus == 'CHECKING'} ? 'active'">확인중</a>
+                    <a href="?status=PROCESSING" th:href="@{/admin/complaints(status='PROCESSING')}" th:classappend="${selectedStatus == 'PROCESSING'} ? 'active'">처리중</a>
+                    <a href="?status=COMPLETED" th:href="@{/admin/complaints(status='COMPLETED')}" th:classappend="${selectedStatus == 'COMPLETED'} ? 'active'">답변완료</a>
+                </nav>
+                <p>총 <strong th:text="${complaintCount}">0</strong>건</p>
+            </section>
+
+            <section class="admin-complaint-list" aria-label="민원 목록">
+                <article class="admin-complaint" th:each="item : ${complaints}">
+                    <button class="admin-complaint-summary" type="button" aria-expanded="false" th:attr="aria-controls=${'admin-complaint-' + item.complaintNo}">
+                        <span class="admin-status" th:classappend="${item.statusCssClass}" th:text="${item.statusLabel}">확인중</span>
+                        <span class="admin-summary-main"><small th:text="${item.categoryLabel}">기사 민원</small><strong class="complaint-title-link" role="button" tabindex="0" th:attr="data-complaint-modal-open=${'complaint-modal-' + item.complaintNo}" th:text="${item.title}">민원 제목</strong><em><b th:text="${item.memberName}">회원</b> · <span th:text="${item.memberId}">member</span></em></span>
+                        <time th:text="${item.registeredDateTime}">2026.08.20</time><span class="admin-chevron">⌄</span>
+                    </button>
+                    <div class="admin-complaint-detail" th:id="${'admin-complaint-' + item.complaintNo}" hidden>
+                        <div class="complaint-information">
+                            <dl><div><dt>민원번호</dt><dd th:text="${item.complaintNo}">1</dd></div><div><dt>신청인</dt><dd th:text="${item.memberName}">회원</dd></div><div><dt>아이디</dt><dd th:text="${item.memberId}">member</dd></div><div><dt>휴대전화</dt><dd th:text="${item.memberPhone}">010</dd></div></dl>
+                            <div class="admin-content-box"><h3>민원 내용</h3><div th:utext="${item.content}">민원 내용</div></div>
+                            <div class="admin-content-box"><h3>민원 첨부파일</h3>
+                                <div class="attachment-links compact" th:if="${!#lists.isEmpty(item.complaintAttachments)}"><a th:each="file : ${item.complaintAttachments}" th:href="@{${file.downloadUrl}}"><span>↓</span><strong th:text="${file.originalName}">파일</strong><small th:text="${file.formattedSize}">1 MB</small></a></div>
+                                <p class="no-attachment" th:if="${#lists.isEmpty(item.complaintAttachments)}">등록된 첨부파일이 없습니다.</p>
+                            </div>
+                        </div>
+                        <form class="answer-form" method="post" enctype="multipart/form-data" data-answer-status-form th:action="@{/admin/complaints/{no}(no=${item.complaintNo})}">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="version" th:value="${item.version}">
+                            <div class="answer-heading"><div><h3>관리자 답변</h3><p th:if="${!#strings.isEmpty(item.answerAdminName)}"><span th:text="${item.answerAdminName}">관리자</span> · <span th:text="${item.answeredDateTime}">날짜</span></p></div>
+                                <label>처리상태<select name="status" required data-answer-status><option value="CHECKING" data-default-answer="민원을 확인중입니다." th:selected="${item.statusCode == 'CHECKING'}">확인중</option><option value="PROCESSING" data-default-answer="민원을 처리중입니다." th:selected="${item.statusCode == 'PROCESSING'}">처리중</option><option value="COMPLETED" data-default-answer="등록해주신 민원에 대해 처리가 완료 되었습니다." th:selected="${item.statusCode == 'COMPLETED'}">답변완료</option></select></label></div>
+                            <textarea name="answerContent" maxlength="3000" required data-answer-content placeholder="사용자에게 전달할 답변을 입력해 주세요." th:text="${item.answerContent}"></textarea>
+                            <div class="answer-existing-files" th:if="${!#lists.isEmpty(item.answerAttachments)}"><h4>등록된 답변 첨부파일</h4><div class="attachment-links compact"><a th:each="file : ${item.answerAttachments}" th:href="@{${file.downloadUrl}}"><span>↓</span><strong th:text="${file.originalName}">파일</strong><small th:text="${file.formattedSize}">1 MB</small></a></div></div>
+                            <div class="answer-file-input"><label th:for="${'answer-files-' + item.complaintNo}">답변 파일첨부</label><input th:id="${'answer-files-' + item.complaintNo}" type="file" name="answerAttachments" multiple accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.hwp,.hwpx" data-answer-file-input><small data-answer-file-names>선택된 파일이 없습니다.</small><button type="button" data-answer-file-clear>선택 취소</button></div>
+                            <div class="answer-actions"><span>답변은 3,000자 이내로 입력해 주세요.</span><button type="submit">답변 및 상태 저장</button></div>
+                        </form>
+                    </div>
+                </article>
+                <div class="admin-empty" th:if="${#lists.isEmpty(complaints)}">해당 조건의 민원이 없습니다.</div>
+            </section>
+        </main>
+    </div>
+</div>
+<th:block th:each="item : ${complaints}"><div th:replace="~{admin/fragments :: complaintModal(${item})}"></div></th:block>
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

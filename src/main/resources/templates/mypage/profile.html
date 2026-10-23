@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="(주) 서경 마을버스 회원정보 수정">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="app-context-path" content="/" th:content="@{/}">
+    <title>정보수정 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css(v='20260907b')}">
+    <link rel="stylesheet" href="../../static/css/mypage.css" th:href="@{/css/mypage.css}">
+    <script src="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>
+    <script src="../../static/js/app-context.js" th:src="@{/js/app-context.js}" defer></script>
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+    <script src="../../static/js/mypage.js" th:src="@{/js/mypage.js}" defer></script>
+</head>
+<body>
+<a class="public-skip-link" href="#mypage-content">마이페이지 내용으로 바로가기</a>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<section th:replace="~{fragments/public-layout :: subHero('/images/subpages/signup-hero.png', '마이페이지')}"></section>
+
+<main id="mypage-content" class="mypage-page">
+    <div class="mypage-shell">
+        <aside th:replace="~{mypage/fragments :: sidebar(${activeMyPageMenu})}"></aside>
+        <section class="mypage-content-panel" aria-labelledby="profile-title">
+            <div class="mypage-heading">
+                <span>MEMBER INFORMATION</span>
+                <h1 id="profile-title">정보수정</h1>
+                <p>가입정보를 확인하고 필요한 항목을 변경할 수 있습니다.</p>
+            </div>
+
+            <p class="mypage-alert success" th:if="${successMessage}" th:text="${successMessage}"></p>
+            <p class="mypage-alert error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+            <form id="profile-form" class="mypage-profile-form" method="post"
+                  th:action="@{/mypage/profile}" th:object="${profileForm}"
+                  th:attr="data-original-phone=${employee.empPhone}" novalidate>
+                <input type="hidden" th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input id="profile-phone-token" type="hidden" th:field="*{phoneVerificationToken}">
+
+                <div class="mypage-field">
+                    <label for="profile-id">아이디</label>
+                    <input id="profile-id" type="text" th:value="${employee.empId}" readonly>
+                    <small>아이디는 변경할 수 없습니다.</small>
+                </div>
+
+                <div class="mypage-field">
+                    <label for="profile-name">이름</label>
+                    <input id="profile-name" type="text" th:value="${employee.empName}" readonly>
+                    <small>이름은 변경할 수 없습니다.</small>
+                </div>
+
+                <div class="mypage-field">
+                    <label for="new-password">새 비밀번호 <em>선택</em></label>
+                    <div class="mypage-password-wrap">
+                        <input id="new-password" type="password" th:field="*{newPassword}"
+                               autocomplete="new-password" placeholder="변경할 때만 영문·숫자 포함 8자 이상 입력">
+                        <button type="button" data-password-toggle="new-password">보기</button>
+                    </div>
+                    <p class="mypage-field-error" th:errors="*{newPassword}"></p>
+                </div>
+
+                <div class="mypage-field">
+                    <label for="new-password-confirm">새 비밀번호 확인 <em>선택</em></label>
+                    <div class="mypage-password-wrap">
+                        <input id="new-password-confirm" type="password" th:field="*{newPasswordConfirm}"
+                               autocomplete="new-password" placeholder="새 비밀번호를 다시 입력해 주세요">
+                        <button type="button" data-password-toggle="new-password-confirm">보기</button>
+                    </div>
+                    <p id="profile-password-message" class="mypage-field-error"
+                       th:errors="*{newPasswordConfirm}"></p>
+                </div>
+
+                <div class="mypage-field">
+                    <label for="profile-email">이메일 <em>필수</em></label>
+                    <input id="profile-email" type="email" th:field="*{empEmail}"
+                           autocomplete="email" maxlength="100" required>
+                    <p class="mypage-field-error" th:errors="*{empEmail}"></p>
+                </div>
+
+                <div class="mypage-field">
+                    <label for="profile-phone">연락처 <em>필수</em></label>
+                    <div class="mypage-input-action">
+                        <input id="profile-phone" type="tel" th:field="*{empPhone}"
+                               autocomplete="tel" inputmode="numeric" maxlength="11"
+                               pattern="01[0-9]{8,9}" required>
+                        <button id="profile-request-code" type="button">인증번호 요청</button>
+                    </div>
+                    <p id="profile-phone-message" class="mypage-field-error"
+                       th:errors="*{empPhone}"></p>
+                </div>
+
+                <div id="profile-phone-verification" class="mypage-field mypage-verification" hidden>
+                    <label for="profile-phone-code">휴대전화 인증</label>
+                    <div class="mypage-input-action">
+                        <div class="mypage-code-wrap">
+                            <input id="profile-phone-code" type="text" inputmode="numeric"
+                                   maxlength="6" placeholder="인증번호 6자리">
+                            <span id="profile-verification-timer">03:00</span>
+                        </div>
+                        <button id="profile-verify-code" type="button">인증확인</button>
+                    </div>
+                    <p id="profile-code-message" class="mypage-field-error"
+                       th:errors="*{phoneVerificationToken}"></p>
+                </div>
+
+                <fieldset class="mypage-address-fieldset">
+                    <legend>주소 <em>선택</em></legend>
+                    <div class="mypage-input-action">
+                        <input id="profile-postcode" type="text" th:field="*{postcode}"
+                               placeholder="우편번호" readonly>
+                        <button id="profile-search-address" type="button">주소 검색</button>
+                    </div>
+                    <input id="profile-address" type="text" th:field="*{address}"
+                           placeholder="기본 주소" readonly>
+                    <input id="profile-address-detail" type="text" th:field="*{addressDetail}"
+                           autocomplete="street-address" maxlength="100" placeholder="상세 주소">
+                    <p class="mypage-field-error" th:errors="*{postcode}"></p>
+                    <p class="mypage-field-error" th:errors="*{address}"></p>
+                    <p class="mypage-field-error" th:errors="*{addressDetail}"></p>
+                </fieldset>
+
+                <p class="mypage-field-error form-error" th:if="${#fields.hasGlobalErrors()}"
+                   th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+
+                <div class="mypage-form-actions profile-actions">
+                    <button class="mypage-primary-button" type="submit">저장</button>
+                    <a class="mypage-secondary-button" th:href="@{/}">취소</a>
+                </div>
+            </form>
+
+            <div class="mypage-withdraw-area">
+                <div>
+                    <strong>회원탈퇴</strong>
+                    <span>탈퇴 후에는 로그인할 수 없으며 기존 문의 기록은 보존됩니다.</span>
+                </div>
+                <form id="withdraw-form" method="post" th:action="@{/mypage/withdraw}">
+                    <input type="hidden" th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit">회원탈퇴</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

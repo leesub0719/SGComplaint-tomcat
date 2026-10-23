@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.mapper.AdminDeletionAuditMapper">
+    <insert id="insert">
+        INSERT INTO sgtransit_admin_delete_audit (
+            admin_emp_no, admin_emp_id, target_type, target_no,
+            target_summary, snapshot_json, deleted_at
+        ) VALUES (
+            #{adminEmpNo}, #{adminEmpId}, #{targetType}, #{targetNo},
+            #{targetSummary}, CAST(#{snapshotJson} AS JSON), CURRENT_TIMESTAMP
+        )
+    </insert>
+</mapper>

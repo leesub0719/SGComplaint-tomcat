@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TOMCAT_HOME/conf/Catalina/localhost/sgcomplaint.xml 예시입니다.
+  파일명이 Context Path(/sgcomplaint)를 결정합니다. path 속성은 지정하지 않습니다.
+-->
+<Context>
+  <!-- Tomcat 재시작/재배포 사이에 세션을 디스크로 직렬화하지 않습니다. -->
+  <Manager pathname="" />
+
+  <!-- 같은 서버의 리버스 프록시만 전달 헤더를 신뢰합니다. 프록시가 없으면 Valve를 제거하세요. -->
+  <Valve className="org.apache.catalina.valves.RemoteIpValve"
+         internalProxies="127\.0\.0\.1|::1|0:0:0:0:0:0:0:1"
+         remoteIpHeader="x-forwarded-for"
+         protocolHeader="x-forwarded-proto"
+         protocolHeaderHttpsValue="https" />
+</Context>

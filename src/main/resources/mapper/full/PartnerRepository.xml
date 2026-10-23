@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.PartnerRepository">
+  <resultMap id="partner" type="com.transit.SGComplaint.domain.Partner"><id property="partnerNo" column="partner_no"/><result property="name" column="partner_name"/><result property="phone" column="partner_phone"/><result property="site" column="partner_site"/><result property="notes" column="partner_notes"/><result property="status" column="partner_status"/><result property="createdAt" column="created_at"/><result property="updatedAt" column="updated_at"/></resultMap>
+
+    <select id="findById" resultMap="partner">
+        SELECT *
+        FROM sgtransit_partner
+        WHERE partner_no=#{partnerNo}
+    </select>
+
+    <insert id="insertPartner" useGeneratedKeys="true" keyProperty="partnerNo" keyColumn="partner_no">
+        INSERT INTO sgtransit_partner (
+            partner_name,
+            partner_phone,
+            partner_site,
+            partner_notes,
+            partner_status,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{name},
+            #{phone},
+            #{site},
+            #{notes},
+            #{status},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updatePartner">
+        UPDATE sgtransit_partner
+        SET partner_name=#{name},
+            partner_phone=#{phone},
+            partner_site=#{site},
+            partner_notes=#{notes},
+            partner_status=#{status},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE partner_no=#{partnerNo}
+    </update>
+</mapper>

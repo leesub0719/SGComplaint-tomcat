@@ -1,0 +1,20 @@
+:root {
+    --admin-brand-yellow: #f4c300;
+    --admin-brand-ink: #ffffff;
+}
+
+.admin-brand .brand-icon {
+    width: 50px;
+    height: 38px;
+    color: var(--admin-brand-ink);
+    background: var(--admin-brand-yellow);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: .06em;
+}
+
+.admin-brand strong {
+    color: var(--admin-brand-yellow);
+    letter-spacing: -.02em;
+}

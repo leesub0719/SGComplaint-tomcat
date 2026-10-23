@@ -1,0 +1,52 @@
+name: WAR CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Test and build external-Tomcat WAR
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon clean test bootWar
+
+      - name: Verify WAR layout
+        shell: bash
+        run: |
+          test -f build/libs/sgcomplaint.war
+          jar tf build/libs/sgcomplaint.war > build/war-contents.txt
+          grep -q '^WEB-INF/classes/com/transit/SGComplaint/SGComplaintApplication.class$' build/war-contents.txt
+          grep -q '^WEB-INF/classes/templates/' build/war-contents.txt
+          grep -q '^WEB-INF/lib-provided/.*tomcat.*\.jar$' build/war-contents.txt
+
+      - name: Upload deployable WAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: sgcomplaint-war-${{ github.sha }}
+          path: build/libs/sgcomplaint.war
+          if-no-files-found: error
+          retention-days: 14

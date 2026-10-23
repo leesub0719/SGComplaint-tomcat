@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.mapper.AbuseLimitMapper">
+    <delete id="deleteExpired">
+        DELETE FROM sgtransit_abuse_limit
+        WHERE reset_at &lt; TIMESTAMPADD(DAY, -1, CURRENT_TIMESTAMP)
+    </delete>
+    <insert id="ensureBucket">
+        INSERT INTO sgtransit_abuse_limit (bucket_key, hits, reset_at)
+        VALUES (#{key}, 0, CURRENT_TIMESTAMP)
+        ON DUPLICATE KEY UPDATE bucket_key = bucket_key
+    </insert>
+
+    <update id="take">
+        UPDATE sgtransit_abuse_limit
+        SET hits = CASE WHEN reset_at &lt;= CURRENT_TIMESTAMP THEN 1 ELSE hits + 1 END,
+            reset_at = CASE WHEN reset_at &lt;= CURRENT_TIMESTAMP
+                THEN TIMESTAMPADD(SECOND, #{seconds}, CURRENT_TIMESTAMP) ELSE reset_at END
+        WHERE bucket_key = #{key}
+          AND (reset_at &lt;= CURRENT_TIMESTAMP OR hits &lt; #{limit})
+    </update>
+</mapper>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${formTitle + ' | (주) 서경 마을버스'}">공지사항 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <script src="../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+    <script src="../../static/js/notice-editor.js" th:src="@{/js/notice-editor.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar(${formTitle}, ${formDescription})}"></header>
+        <main class="admin-content">
+            <div class="flash-message error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <section class="admin-form-panel">
+                <div class="panel-heading">
+                    <div><h2 th:text="${formTitle}">공지사항 등록</h2></div>
+                    <a class="notice-list-link" href="/admin/notices" th:href="@{/admin/notices}">← 공지사항 목록</a>
+                </div>
+                <form id="notice-form" class="notice-form" method="post" action="/admin/notices"
+                      th:action="@{${formAction}}" th:object="${noticeRequest}" enctype="multipart/form-data"
+                      th:attr="data-edit-mode=${editMode}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <div class="form-row">
+                        <label>공지 분류
+                            <select th:field="*{category}" required>
+                                <option value="">분류 선택</option>
+                                <option value="GENERAL">일반 안내</option>
+                                <option value="SYSTEM">시스템 점검</option>
+                                <option value="SERVICE">서비스 변경</option>
+                            </select>
+                        </label>
+                        <label>게시 설정
+                            <span class="notice-setting-options">
+                                <span class="notice-pin-control">
+                                    <input type="checkbox" th:field="*{pinned}">
+                                    고객 게시판 상단 고정
+                                </span>
+                                <span class="notice-pin-control">
+                                    <input type="checkbox" th:field="*{popup}">
+                                    메인 접속 시 팝업 표시
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+                    <label>제목
+                        <input type="text" th:field="*{title}" maxlength="100" placeholder="공지사항 제목을 입력해 주세요." required>
+                    </label>
+                    <div class="notice-content-field">
+                        <div class="notice-editor-label"><strong>내용</strong><span><b id="notice-content-count">0</b>/3000</span></div>
+                        <div class="notice-editor-shell">
+                            <div class="notice-editor-toolbar" role="toolbar" aria-label="공지사항 본문 서식 도구">
+                                <select id="notice-editor-font" aria-label="글꼴"><option value="Malgun Gothic">맑은 고딕</option><option value="Arial">Arial</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option></select>
+                                <select id="notice-editor-size" aria-label="글자 크기"><option value="2">작게</option><option value="3" selected>보통</option><option value="4">크게</option><option value="5">매우 크게</option></select>
+                                <span class="notice-toolbar-divider" aria-hidden="true"></span>
+                                <button type="button" data-notice-command="bold" title="굵게"><strong>B</strong></button>
+                                <button type="button" data-notice-command="italic" title="기울임"><em>I</em></button>
+                                <button type="button" data-notice-command="underline" title="밑줄"><u>U</u></button>
+                                <button type="button" data-notice-command="insertUnorderedList" title="글머리 목록">• 목록</button>
+                                <button type="button" data-notice-command="insertOrderedList" title="번호 목록">1. 목록</button>
+                                <button type="button" data-notice-command="removeFormat" title="서식 지우기">서식 지우기</button>
+                                <span class="notice-toolbar-divider" aria-hidden="true"></span>
+                                <button id="notice-image-button" class="notice-image-button" type="button">▧ 이미지</button>
+                            </div>
+                            <div id="notice-editor" class="notice-editor" contenteditable="true" role="textbox"
+                                 th:attr="data-edit-mode=${editMode}"
+                                 aria-multiline="true" data-placeholder="공지사항 내용을 입력하거나 이미지를 끌어다 놓아 주세요."></div>
+                            <textarea id="notice-content" th:field="*{content}" hidden></textarea>
+                            <input id="notice-content-images" name="contentImages" type="file"
+                                   accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden>
+                        </div>
+                        <p id="notice-editor-message" class="notice-editor-message" aria-live="polite">이미지 버튼을 누르거나 파일을 내용 칸으로 끌어다 놓으세요. 기존 이미지 포함 최대 5장, 장당 5MB·2,000만 화소·가로·세로 10,000px 이하입니다. 움직이는 WEBP는 지원하지 않습니다.</p>
+                    </div>
+                    <div class="form-bottom">
+                        <span th:text="${editMode ? '수정사항은 저장 즉시 고객 게시판에 반영됩니다.' : '등록 즉시 고객 공지사항 게시판에 노출되며, 팝업 설정 시 메인 화면에도 표시됩니다.'}">등록 즉시 반영됩니다.</span>
+                        <button type="submit" th:text="${submitLabel}">공지사항 등록</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+</div>
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

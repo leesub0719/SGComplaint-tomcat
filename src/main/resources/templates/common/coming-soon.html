@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>페이지 준비 중 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}" href="../../static/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/public-layout.css}" href="../../static/css/public-layout.css">
+    <script th:src="@{/js/public-layout.js}" src="../../static/js/public-layout.js" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<section th:replace="~{fragments/public-layout :: subHero(${pageHeroImage != null ? pageHeroImage : '/images/subpages/coming-soon-hero.png'}, ${title})}"></section>
+<main class="message-card">
+    <div class="message-icon" aria-hidden="true">🛠</div>
+    <h1 th:text="${title}">페이지 준비 중</h1>
+    <p th:text="${description != null ? description : '요청하신 페이지는 다음 단계에서 기능을 연결할 예정입니다.'}">요청하신 페이지는 준비 중입니다.</p>
+    <div class="message-actions">
+        <a class="button primary" href="/" th:href="@{/}">메인으로</a>
+    </div>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

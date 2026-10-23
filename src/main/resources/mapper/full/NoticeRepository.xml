@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.NoticeRepository">
+  <resultMap id="notice" type="com.transit.SGComplaint.domain.Notice"><id property="noticeNo" column="notice_no"/><result property="adminEmpNo" column="admin_emp_no"/><result property="adminName" column="admin_name"/><result property="category" column="notice_category"/><result property="title" column="notice_title"/><result property="content" column="notice_content"/><result property="pinned" column="is_pinned"/><result property="popup" column="is_popup"/><result property="viewCount" column="view_count"/><result property="createdAt" column="created_at"/><result property="updatedAt" column="updated_at"/></resultMap>
+  <sql id="columns">notice_no,admin_emp_no,admin_name,notice_category,notice_title,notice_content,is_pinned,is_popup,view_count,created_at,updated_at</sql>
+
+    <select id="findById" resultMap="notice">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_notice
+        WHERE notice_no=#{noticeNo}
+    </select>
+
+    <select id="findTop3ByOrderByPinnedDescCreatedAtDesc" resultMap="notice">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_notice
+        ORDER BY is_pinned DESC,
+            created_at DESC
+        LIMIT 3
+    </select>
+
+    <select id="findByPopupOrderByCreatedAtDesc" resultMap="notice">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_notice
+        WHERE is_popup=#{popup}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectPage" resultMap="notice">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_notice
+        <if test="keyword != null and keyword != ''">
+        WHERE notice_title LIKE CONCAT(#{keyword},'%')
+        </if>
+        ORDER BY
+        <choose>
+
+        <when test="adminOrder">
+        created_at DESC
+        </when>
+        <otherwise>
+        is_pinned DESC,
+            created_at DESC
+        </otherwise>
+
+        </choose>
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_notice
+        <if test="keyword != null and keyword != ''">
+        WHERE notice_title LIKE CONCAT(#{keyword},'%')
+        </if>
+
+    </select>
+
+    <insert id="insertNotice" useGeneratedKeys="true" keyProperty="noticeNo" keyColumn="notice_no">
+        INSERT INTO sgtransit_notice (
+            admin_emp_no,
+            admin_name,
+            notice_category,
+            notice_title,
+            notice_content,
+            is_pinned,
+            is_popup,
+            view_count,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{adminEmpNo},
+            #{adminName},
+            #{category},
+            #{title},
+            #{content},
+            #{pinned},
+            #{popup},
+            #{viewCount},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateNotice">
+        UPDATE sgtransit_notice
+        SET admin_emp_no=#{adminEmpNo},
+            admin_name=#{adminName},
+            notice_category=#{category},
+            notice_title=#{title},
+            notice_content=#{content},
+            is_pinned=#{pinned},
+            is_popup=#{popup},
+            view_count=#{viewCount},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE notice_no=#{noticeNo}
+    </update>
+
+    <delete id="deleteById">
+        DELETE
+        FROM sgtransit_notice
+        WHERE notice_no=#{noticeNo}
+    </delete>
+</mapper>

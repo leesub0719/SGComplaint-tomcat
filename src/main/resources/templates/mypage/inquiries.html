@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="(주) 서경 마을버스 나의 문의내역">
+    <title>문의내역 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css(v='20260907b')}">
+    <link rel="stylesheet" href="../../static/css/mypage.css" th:href="@{/css/mypage.css}">
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+</head>
+<body>
+<a class="public-skip-link" href="#mypage-content">마이페이지 내용으로 바로가기</a>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<section th:replace="~{fragments/public-layout :: subHero('/images/subpages/complaints-all-hero.png', '마이페이지')}"></section>
+
+<main id="mypage-content" class="mypage-page">
+    <div class="mypage-shell">
+        <aside th:replace="~{mypage/fragments :: sidebar(${activeMyPageMenu})}"></aside>
+        <section class="mypage-content-panel" aria-labelledby="inquiries-title">
+            <div class="mypage-heading">
+                <span>MY INQUIRIES</span>
+                <h1 id="inquiries-title">문의내역</h1>
+                <p>내가 등록한 문의와 답변 상태를 확인할 수 있습니다.</p>
+            </div>
+
+            <form class="inquiry-period-form" method="get" th:action="@{/mypage/inquiries}">
+                <label for="inquiry-start-date">조회기간</label>
+                <input id="inquiry-start-date" name="startDate" type="date" th:value="${startDate}">
+                <span>~</span>
+                <input name="endDate" type="date" th:value="${endDate}" aria-label="조회 종료일">
+                <button type="submit">조회</button>
+            </form>
+
+            <div class="inquiry-summary">
+                총 <strong th:text="${inquiryPage.totalElements}">0</strong>건의 문의가 있습니다.
+                <a th:href="@{/complaints/new}">새 문의 작성</a>
+            </div>
+
+            <div class="inquiry-empty" th:if="${#lists.isEmpty(inquiries)}">
+                <strong>조회된 문의내역이 없습니다.</strong>
+                <span>조회기간을 변경하거나 새로운 문의를 작성해 주세요.</span>
+            </div>
+
+            <div class="inquiry-list" th:unless="${#lists.isEmpty(inquiries)}">
+                <details class="inquiry-item" th:each="item : ${inquiries}">
+                    <summary>
+                        <span class="inquiry-number" th:text="${'#' + item.complaintNo}">#1</span>
+                        <strong th:text="${item.title}">문의 제목</strong>
+                        <span class="inquiry-status" th:classappend="${item.statusCssClass}"
+                              th:text="${item.statusLabel}">확인중</span>
+                        <time th:datetime="${item.registeredDateTime}"
+                              th:text="${item.registeredDate}">2026.09.03</time>
+                    </summary>
+                    <div class="inquiry-detail">
+                        <section>
+                            <h2>문의 내용</h2>
+                            <div class="inquiry-content" th:utext="${item.content}">문의 내용</div>
+                        </section>
+                        <section class="inquiry-answer">
+                            <h2>답변</h2>
+                            <p th:if="${#strings.isEmpty(item.answerContent)}">담당자가 문의 내용을 확인하고 있습니다.</p>
+                            <p th:unless="${#strings.isEmpty(item.answerContent)}"
+                               th:text="${item.answerContent}">답변 내용</p>
+                            <div class="inquiry-attachments" th:if="${!#lists.isEmpty(item.answerAttachments)}">
+                                <a th:each="file : ${item.answerAttachments}"
+                                   th:href="@{${file.downloadUrl}}"
+                                   th:text="${file.originalName + ' (' + file.formattedSize + ')'}">첨부파일</a>
+                            </div>
+                        </section>
+                    </div>
+                </details>
+            </div>
+            <nav class="inquiry-pagination" th:if="${inquiryPage.totalPages > 1}" aria-label="문의내역 페이지">
+                <a th:if="${!inquiryPage.first}"
+                   th:href="@{/mypage/inquiries(startDate=${startDate},endDate=${endDate},page=${inquiryPage.number - 1})}">이전</a>
+                <th:block th:each="pageNo : ${#numbers.sequence(0, inquiryPage.totalPages - 1)}">
+                    <a th:if="${pageNo >= inquiryPage.number - 2 and pageNo <= inquiryPage.number + 2}"
+                       th:classappend="${pageNo == inquiryPage.number} ? 'active'"
+                       th:text="${pageNo + 1}"
+                       th:href="@{/mypage/inquiries(startDate=${startDate},endDate=${endDate},page=${pageNo})}">1</a>
+                </th:block>
+                <a th:if="${!inquiryPage.last}"
+                   th:href="@{/mypage/inquiries(startDate=${startDate},endDate=${endDate},page=${inquiryPage.number + 1})}">다음</a>
+            </nav>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

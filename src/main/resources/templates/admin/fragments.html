@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside class="admin-sidebar" th:fragment="sidebar(activeMenu)">
+    <a class="admin-brand" href="/admin" th:href="@{/admin}">
+        <span class="brand-icon" aria-hidden="true">013</span>
+        <span><strong>(주) 서경 마을버스</strong><small>민원 관리 시스템</small></span>
+    </a>
+    <nav class="admin-nav" aria-label="관리자 메뉴">
+        <p>WORKSPACE</p>
+        <a href="/admin" th:href="@{/admin}" th:classappend="${activeMenu == 'dashboard'} ? 'active'">
+            <span aria-hidden="true">▦</span> 대시보드
+        </a>
+        <a href="/admin/main-page" th:href="@{/admin/main-page}" th:classappend="${activeMenu == 'main-page'} ? 'active'">
+            <span aria-hidden="true">▧</span> 메인페이지 관리
+        </a>
+        <a href="/admin/complaints" th:href="@{/admin/complaints}" th:classappend="${activeMenu == 'complaints'} ? 'active'">
+            <span aria-hidden="true">▤</span> 민원 관리
+        </a>
+        <a href="/admin/notices" th:href="@{/admin/notices}" th:classappend="${activeMenu == 'notices'} ? 'active'">
+            <span aria-hidden="true">◫</span> 공지사항
+        </a>
+        <a href="/admin/routes" th:href="@{/admin/routes}" th:classappend="${activeMenu == 'routes'} ? 'active'">
+            <span aria-hidden="true">↝</span> 운행안내 추가
+        </a>
+        <a href="/admin/members" th:href="@{/admin/members}" th:classappend="${activeMenu == 'members'} ? 'active'">
+            <span aria-hidden="true">♙</span> 회원 관리
+        </a>
+        <a href="/admin/partners" th:if="${isMaster}" th:href="@{/admin/partners}" th:classappend="${activeMenu == 'partners'} ? 'active'">
+            <span aria-hidden="true">♧</span> 협력업체
+        </a>
+    </nav>
+    <div class="sidebar-bottom">
+        <a href="/" th:href="@{/}">사용자 메인으로</a>
+        <form method="post" action="/logout" th:action="@{/logout}">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit">로그아웃</button>
+        </form>
+    </div>
+</aside>
+
+<header class="admin-topbar" th:fragment="topbar(title, description)">
+    <button class="sidebar-toggle" type="button" aria-label="관리자 메뉴 열기" aria-expanded="false">☰</button>
+    <div><h1 th:text="${title}">대시보드</h1><p th:text="${description}">관리자 페이지</p></div>
+    <div class="admin-profile"><span class="profile-avatar" th:text="${isMaster ? 'M' : 'A'}">A</span><span><strong th:text="${adminName}">관리자</strong><small th:text="${isMaster ? 'Master' : 'Administrator'}">Administrator</small></span></div>
+</header>
+
+<div class="complaint-modal" th:fragment="complaintModal(item)"
+     th:id="${'complaint-modal-' + item.complaintNo}" hidden>
+    <div class="complaint-modal-backdrop" data-complaint-modal-close></div>
+    <section class="complaint-modal-dialog" role="dialog" aria-modal="true"
+             th:attr="aria-labelledby=${'complaint-modal-title-' + item.complaintNo}">
+        <header class="complaint-modal-header">
+            <div><h2 th:id="${'complaint-modal-title-' + item.complaintNo}">민원 상세내용</h2></div>
+            <button type="button" data-complaint-modal-close aria-label="팝업 닫기">×</button>
+        </header>
+        <div class="complaint-modal-body">
+            <dl class="modal-information">
+                <div><dt>민원 번호</dt><dd th:text="${item.complaintNo}">1</dd></div>
+                <div><dt>신청인</dt><dd th:text="${item.memberName}">회원</dd></div>
+                <div class="wide"><dt>제목</dt><dd th:text="${item.title}">민원 제목</dd></div>
+                <div><dt>상태</dt><dd><span class="admin-status" th:classappend="${item.statusCssClass}" th:text="${item.statusLabel}">확인중</span></dd></div>
+                <div><dt>등록일</dt><dd th:text="${item.registeredDateTime}">2026.08.20</dd></div>
+            </dl>
+            <div class="modal-content-section"><h3>내용</h3><div th:utext="${item.content}">민원 내용</div></div>
+            <div class="modal-content-section">
+                <h3>첨부파일</h3>
+                <div class="attachment-links" th:if="${!#lists.isEmpty(item.complaintAttachments)}">
+                    <a th:each="file : ${item.complaintAttachments}" th:href="@{${file.downloadUrl}}">
+                        <span>↓</span><strong th:text="${file.originalName}">첨부파일.pdf</strong><small th:text="${file.formattedSize}">1 MB</small>
+                    </a>
+                </div>
+                <p class="no-attachment" th:if="${#lists.isEmpty(item.complaintAttachments)}">등록된 첨부파일이 없습니다.</p>
+            </div>
+        </div>
+        <footer class="complaint-modal-footer"><button type="button" data-complaint-modal-close>닫기</button></footer>
+    </section>
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+plugins {
+	id 'java'
+	id 'war'
+	id 'org.springframework.boot' version '4.1.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.transit'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.1.0'
+	implementation 'org.springframework.data:spring-data-commons'
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.flywaydb:flyway-mysql'
+	// Boot 4에서는 컨테이너 바이너리만 provided로 두어야 공통 Spring 모듈이 WAR에서 빠지지 않습니다.
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat-runtime'
+	testRuntimeOnly 'com.h2database:h2'
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// SOLAPI 문자 발송
+	implementation 'com.solapi:sdk:1.0.3'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+tasks.named('bootWar') {
+	archiveFileName = 'sgcomplaint.war'
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+	options.compilerArgs += '-parameters'
+	options.fork = true
+}
+
+['check', 'baseline', 'info', 'migrate', 'validate'].each { command ->
+    tasks.register('db' + command.capitalize(), JavaExec) {
+        group = 'database'
+        description = 'Run the guarded database migration tool: ' + command
+        classpath = sourceSets.main.runtimeClasspath
+        mainClass = 'com.transit.SGComplaint.migration.DatabaseMigrationTool'
+        jvmArgs '-Dfile.encoding=UTF-8'
+        args command
+    }
+}

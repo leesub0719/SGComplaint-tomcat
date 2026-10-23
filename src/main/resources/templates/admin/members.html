@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 관리 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <script src="../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar('회원 관리', '회원 검색과 상태·권한 관리 화면입니다.')}"></header>
+        <main class="admin-content">
+            <div class="flash-message success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-message error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <section class="member-summary-grid" aria-label="회원 현황">
+                <article><span>전체 회원</span><a th:href="@{/admin/members(memberStatus='ALL',memberRole='ALL')}" th:text="${totalMemberCount}">0</a><small>등록된 전체 계정</small></article>
+                <article><span>이용중</span><a th:href="@{/admin/members(memberStatus='Y',memberRole='ALL')}" th:text="${activeMemberCount}">0</a><small>상태 Y</small></article>
+                <article><span>탈퇴 회원</span><a th:href="@{/admin/members(memberStatus='N',memberRole='ALL')}" th:text="${withdrawnMemberCount}">0</a><small>상태 N</small></article>
+                <article><span>관리자</span><a th:href="@{/admin/members(memberStatus='ALL',memberRole='A')}" th:text="${administratorCount}">0</a><small>권한 A</small></article>
+                <article><span>마스터</span><a th:href="@{/admin/members(memberStatus='ALL',memberRole='M')}" th:text="${masterCount}">0</a><small>권한 M</small></article>
+            </section>
+
+            <section class="admin-panel member-panel">
+                <div class="panel-heading">
+                    <div><h2>회원 목록</h2></div>
+                    <em>검색 결과 <b th:text="${searchCount}">0</b>명</em>
+                </div>
+
+                <form class="member-search" method="get" action="/admin/members" th:action="@{/admin/members}">
+                    <label class="sr-only" for="member-status">회원 상태</label>
+                    <select id="member-status" name="memberStatus">
+                        <option value="ALL" th:selected="${selectedMemberStatus == 'ALL'}">전체 상태</option>
+                        <option value="Y" th:selected="${selectedMemberStatus == 'Y'}">이용중</option>
+                        <option value="N" th:selected="${selectedMemberStatus == 'N'}">탈퇴 회원</option>
+                    </select>
+                    <label class="sr-only" for="member-role">회원 권한</label>
+                    <select id="member-role" name="memberRole">
+                        <option value="ALL" th:selected="${selectedMemberRole == 'ALL'}">전체 권한</option>
+                        <option value="U" th:selected="${selectedMemberRole == 'U'}">사용자</option>
+                        <option value="A" th:selected="${selectedMemberRole == 'A'}">관리자</option>
+                        <option value="M" th:selected="${selectedMemberRole == 'M'}">마스터</option>
+                    </select>
+                    <label class="sr-only" for="member-keyword">아이디 또는 이름</label>
+                    <input id="member-keyword" name="keyword" type="search"
+                           placeholder="아이디·이름·이메일·전화번호 앞부분 검색" maxlength="50" th:value="${keyword}">
+                    <button type="submit">검색</button>
+                </form>
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table member-table">
+                        <thead><tr><th>회원번호</th><th>아이디</th><th>이름</th><th>휴대전화</th><th>권한</th><th>상태</th><th>가입일</th><th>권한 관리</th></tr></thead>
+                        <tbody>
+                        <tr th:each="member : ${members}">
+                            <td th:text="${member.empNo}">1</td>
+                            <td><button class="member-id-button" type="button"
+                                        th:attr="data-member-modal-open=${'member-modal-' + member.empNo}"
+                                        th:text="${member.empId}">member</button><small class="current-account-label" th:if="${member.currentAdministrator}">현재 계정</small><small th:if="${member.withdrawalOriginalId != null}" th:text="${'탈퇴 전: ' + member.withdrawalOriginalId}">탈퇴 전 아이디</small></td>
+                            <td th:text="${member.empName}">홍길동</td>
+                            <td th:text="${member.empPhone}">01012345678</td>
+                            <td><span class="member-role-badge" th:classappend="${member.roleCode == 'M'} ? 'master' : (${member.roleCode == 'A'} ? 'admin' : 'user')" th:text="${member.roleLabel}">사용자</span></td>
+                            <td><span class="member-status-badge" th:classappend="${member.statusCode == 'Y'} ? 'active' : 'withdrawn'" th:text="${member.statusLabel}">이용중</span></td>
+                            <td th:text="${member.createdDate}">2026.08.21</td>
+                            <td>
+                                <span class="self-role-lock" th:if="${member.currentAdministrator}">변경 불가</span>
+                                <span class="self-role-lock" th:if="${!member.currentAdministrator and member.roleCode == 'M' and !isMaster}">마스터 전용</span>
+                                <form class="member-role-form" method="post" data-member-role-form
+                                      th:attr="data-member-name=${member.empName}"
+                                      th:if="${!member.currentAdministrator and (isMaster or member.roleCode != 'M')}"
+                                      th:action="@{/admin/members/{empNo}/role(empNo=${member.empNo})}">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="memberStatus" th:value="${selectedMemberStatus}">
+                                    <input type="hidden" name="memberRole" th:value="${selectedMemberRole}">
+                                    <input type="hidden" name="keyword" th:value="${keyword}">
+                                    <input type="hidden" name="page" th:value="${memberPage.number}">
+                                    <select name="role" th:attr="aria-label=${member.empName + ' 회원 권한'}">
+                                        <option value="U" th:selected="${member.roleCode == 'U'}">사용자</option>
+                                        <option value="A" th:selected="${member.roleCode == 'A'}">관리자</option>
+                                        <option value="M" th:if="${isMaster}" th:selected="${member.roleCode == 'M'}">마스터</option>
+                                    </select>
+                                    <button type="submit">변경</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(members)}"><td class="table-empty" colspan="8">검색 조건에 해당하는 회원이 없습니다.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <nav class="admin-pagination" th:if="${memberPage.totalPages > 1}" aria-label="회원 목록 페이지">
+                    <a th:classappend="${memberPage.first} ? 'disabled'"
+                       th:href="@{/admin/members(memberStatus=${selectedMemberStatus},memberRole=${selectedMemberRole},keyword=${keyword},page=${memberPage.number - 1})}">이전</a>
+                    <th:block th:each="pageNo : ${#numbers.sequence(0, memberPage.totalPages - 1)}">
+                        <a th:if="${pageNo >= memberPage.number - 2 and pageNo <= memberPage.number + 2}"
+                           th:classappend="${pageNo == memberPage.number} ? 'active'"
+                           th:text="${pageNo + 1}"
+                           th:href="@{/admin/members(memberStatus=${selectedMemberStatus},memberRole=${selectedMemberRole},keyword=${keyword},page=${pageNo})}">1</a>
+                    </th:block>
+                    <a th:classappend="${memberPage.last} ? 'disabled'"
+                       th:href="@{/admin/members(memberStatus=${selectedMemberStatus},memberRole=${selectedMemberRole},keyword=${keyword},page=${memberPage.number + 1})}">다음</a>
+                </nav>
+                <p class="member-role-notice">권한을 변경한 회원은 로그아웃 후 다시 로그인해야 새 권한이 적용됩니다.</p>
+            </section>
+        </main>
+    </div>
+</div>
+<th:block th:each="member : ${members}">
+    <div class="member-modal" th:id="${'member-modal-' + member.empNo}" hidden>
+        <div class="member-modal-backdrop" data-member-modal-close></div>
+        <section class="member-modal-dialog" role="dialog" aria-modal="true"
+                 th:attr="aria-labelledby=${'member-modal-title-' + member.empNo}">
+            <header class="member-modal-header">
+                <div><h2 th:id="${'member-modal-title-' + member.empNo}">회원 상세정보</h2></div>
+                <button type="button" data-member-modal-close aria-label="회원 상세 팝업 닫기">×</button>
+            </header>
+            <div class="member-modal-body">
+                <div class="member-profile-summary">
+                    <span th:text="${#strings.substring(member.empName, 0, 1)}">홍</span>
+                    <div><strong th:text="${member.empName}">홍길동</strong><p><b th:text="${member.empId}">member</b> · 회원번호 <em th:text="${member.empNo}">1</em></p></div>
+                    <span class="member-status-badge" th:classappend="${member.statusCode == 'Y'} ? 'active' : 'withdrawn'" th:text="${member.statusLabel}">이용중</span>
+                </div>
+                <dl class="member-detail-grid">
+                    <div><dt>회원번호</dt><dd th:text="${member.empNo}">1</dd></div>
+                    <div><dt>아이디</dt><dd th:text="${member.empId}">member</dd></div>
+                    <div th:if="${member.withdrawalOriginalId != null}"><dt>탈퇴 전 아이디</dt><dd th:text="${member.withdrawalOriginalId}">original</dd></div>
+                    <div><dt>이름</dt><dd th:text="${member.empName}">홍길동</dd></div>
+                    <div><dt>휴대전화</dt><dd th:text="${member.empPhone}">01012345678</dd></div>
+                    <div class="wide"><dt>이메일</dt><dd th:text="${member.empEmail}">member@example.com</dd></div>
+                    <div class="wide"><dt>주소</dt><dd th:text="${member.empAddress}">서울특별시 상세주소</dd></div>
+                    <div><dt>권한</dt><dd><span class="member-role-badge" th:classappend="${member.roleCode == 'M'} ? 'master' : (${member.roleCode == 'A'} ? 'admin' : 'user')" th:text="${member.roleLabel}">사용자</span></dd></div>
+                    <div><dt>상태</dt><dd><span class="member-status-badge" th:classappend="${member.statusCode == 'Y'} ? 'active' : 'withdrawn'" th:text="${member.statusLabel}">이용중</span></dd></div>
+                    <div><dt>가입일시</dt><dd th:text="${member.createdDateTime}">2026.08.21 10:00:00</dd></div>
+                    <div><dt>수정일시</dt><dd th:text="${member.updatedDateTime}">2026.08.21 10:00:00</dd></div>
+                </dl>
+                <p class="password-security-notice">비밀번호는 BCrypt로 암호화되어 저장되며 관리자 화면에도 표시하지 않습니다.</p>
+            </div>
+            <footer class="member-modal-footer"><button type="button" data-member-modal-close>닫기</button></footer>
+        </section>
+    </div>
+</th:block>
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

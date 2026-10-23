@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.ComplaintAnswerRepository">
+  <resultMap id="answer" type="com.transit.SGComplaint.domain.ComplaintAnswer"><id property="answerNo" column="answer_no"/><result property="complaintNo" column="complaint_no"/><result property="adminEmpNo" column="admin_emp_no"/><result property="adminName" column="admin_name"/><result property="answerContent" column="answer_content"/><result property="createdAt" column="created_at"/><result property="updatedAt" column="updated_at"/></resultMap>
+
+    <select id="findByComplaintNo" resultMap="answer">
+        SELECT *
+        FROM sgtransit_complaint_answer
+        WHERE complaint_no=#{complaintNo}
+    </select>
+
+    <select id="findByComplaintNoIn" resultMap="answer">
+        SELECT *
+        FROM sgtransit_complaint_answer
+        WHERE complaint_no IN
+        <foreach collection="complaintNumbers" item="id" open="(" separator="," close=")">
+        #{id}
+        </foreach>
+
+    </select>
+
+    <select id="findById" resultMap="answer">
+        SELECT *
+        FROM sgtransit_complaint_answer
+        WHERE answer_no=#{answerNo}
+    </select>
+
+    <insert id="insertAnswer" useGeneratedKeys="true" keyProperty="answerNo" keyColumn="answer_no">
+        INSERT INTO sgtransit_complaint_answer (
+            complaint_no,
+            admin_emp_no,
+            admin_name,
+            answer_content,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{complaintNo},
+            #{adminEmpNo},
+            #{adminName},
+            #{answerContent},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateAnswer">
+        UPDATE sgtransit_complaint_answer
+        SET admin_emp_no=#{adminEmpNo},
+            admin_name=#{adminName},
+            answer_content=#{answerContent},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE answer_no=#{answerNo}
+    </update>
+</mapper>

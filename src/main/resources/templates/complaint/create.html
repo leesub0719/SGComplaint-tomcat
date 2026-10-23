@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="(주) 서경 마을버스 민원 접수">
+    <meta name="app-context-path" content="/" th:content="@{/}">
+    <title th:text="${formTitle + ' | (주) 서경 마을버스'}">민원 접수 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/complaint.css" th:href="@{/css/complaint.css}">
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <script src="../../static/js/app-context.js" th:src="@{/js/app-context.js}" defer></script>
+    <script src="../../static/js/complaint.js" th:src="@{/js/complaint.js}" defer></script>
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#complaint-form">민원 작성 폼으로 바로가기</a>
+
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<section th:replace="~{fragments/public-layout :: subHero(${formHeroImage}, ${formTitle})}"></section>
+
+<main class="complaint-page">
+    <div class="page-heading">
+        <h1 th:text="${formTitle}">민원 접수하기</h1>
+        <span th:text="${formDescription}">버스 이용 중 겪은 불편 사항이나 문의 내용을 자세히 작성해 주세요.</span>
+    </div>
+
+    <section class="form-card" aria-labelledby="form-title">
+        <div class="form-card-header">
+            <div>
+                <span class="step">STEP 01</span>
+                <h2 id="form-title">민원 내용 작성</h2>
+            </div>
+            <p><em>*</em> 표시는 필수 입력 항목입니다.</p>
+        </div>
+
+        <form id="complaint-form" method="post" action="/complaints"
+              th:action="@{/complaints}" enctype="multipart/form-data" novalidate>
+            <input type="hidden" th:if="${_csrf != null}"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <div class="category-password-row">
+                <div class="form-field">
+                    <label for="complaint-category">분류 <em>*</em></label>
+                    <select id="complaint-category" name="category" required>
+                        <option value="">분류를 선택하세요</option>
+                        <option value="PRAISE" th:selected="${selectedCategory == 'PRAISE'}">칭찬합니다</option>
+                        <option value="COMPLAINT" th:selected="${selectedCategory == 'COMPLAINT'}">불편합니다</option>
+                        <option value="LOST" th:selected="${selectedCategory == 'LOST'}">분실물 문의</option>
+                    </select>
+                    <p class="field-help">접수하려는 내용과 가장 가까운 분류를 선택해 주세요.</p>
+                </div>
+                <div class="form-field">
+                    <label for="post-password">게시글 비밀번호 <em>*</em></label>
+                    <input id="post-password" name="postPassword" type="password"
+                           minlength="4" maxlength="20" autocomplete="new-password"
+                           placeholder="4~20자로 입력해 주세요" required>
+                    <p class="field-help">게시글을 열람할 때 사용하는 비밀번호입니다.</p>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <div class="label-row">
+                    <label for="complaint-title">제목 <em>*</em></label>
+                    <span><strong id="title-count">0</strong>/100</span>
+                </div>
+                <input id="complaint-title" name="title" type="text"
+                       maxlength="100" placeholder="민원 제목을 입력해 주세요"
+                       th:placeholder="${titlePlaceholder}" required>
+            </div>
+
+            <div class="form-field">
+                <div class="label-row">
+                    <label for="complaint-content">내용 <em>*</em></label>
+                    <span><strong id="content-count">0</strong>/2000</span>
+                </div>
+                <div class="editor-shell">
+                    <div class="editor-toolbar" role="toolbar" aria-label="본문 서식 도구">
+                        <select id="editor-font" aria-label="글꼴">
+                            <option value="Malgun Gothic">맑은 고딕</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Verdana">Verdana</option>
+                        </select>
+                        <select id="editor-size" aria-label="글자 크기">
+                            <option value="2">작게</option>
+                            <option value="3" selected>보통</option>
+                            <option value="4">크게</option>
+                            <option value="5">매우 크게</option>
+                        </select>
+                        <span class="toolbar-divider" aria-hidden="true"></span>
+                        <button type="button" data-editor-command="bold" title="굵게"><strong>B</strong></button>
+                        <button type="button" data-editor-command="italic" title="기울임"><em>I</em></button>
+                        <button type="button" data-editor-command="underline" title="밑줄"><u>U</u></button>
+                        <span class="toolbar-divider" aria-hidden="true"></span>
+                        <button type="button" data-editor-command="insertUnorderedList" title="글머리 목록">• 목록</button>
+                        <button type="button" data-editor-command="insertOrderedList" title="번호 목록">1. 목록</button>
+                        <button type="button" data-editor-command="removeFormat" title="서식 지우기">서식 지우기</button>
+                    </div>
+                    <div id="complaint-editor" class="complaint-editor" contenteditable="true"
+                         role="textbox" aria-multiline="true"
+                         data-placeholder="발생 일시, 버스 노선, 차량번호, 정류장, 상황 등을 자세히 작성해 주세요."></div>
+                    <textarea id="complaint-content" name="content" hidden></textarea>
+                </div>
+                <p class="field-help">개인정보나 주민등록번호 등 민감한 정보는 작성하지 마세요.</p>
+            </div>
+
+            <div class="form-field">
+                <label for="complaint-files">첨부파일</label>
+                <label class="file-drop" for="complaint-files">
+                    <span class="file-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M5 14v5h14v-5"/></svg>
+                    </span>
+                    <strong>파일 선택</strong>
+                    <span>사진이나 문서를 최대 5개까지 첨부할 수 있습니다.</span>
+                </label>
+                <input id="complaint-files" class="sr-only" name="attachments" type="file" multiple
+                       accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.hwp,.hwpx">
+                <div class="file-list-heading">
+                    <span id="file-count">첨부파일 0개</span>
+                    <button id="clear-all-files" type="button" hidden>전체 취소</button>
+                </div>
+                <ul id="file-list" class="file-list" aria-live="polite"></ul>
+                <p id="file-message" class="field-message" aria-live="polite"></p>
+                <p id="file-status" class="file-status" aria-live="polite"></p>
+            </div>
+
+            <p id="form-message" class="form-message" tabindex="-1" aria-live="polite"></p>
+
+            <div class="form-actions">
+                <a class="button button-cancel" href="/" th:href="@{/}">취소</a>
+                <button id="complaint-submit" class="button button-submit" type="submit">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+                    <span id="complaint-submit-text">접수하기</span>
+                </button>
+            </div>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+
+<div id="complaint-complete-modal" class="complete-modal" hidden aria-hidden="true">
+    <div class="complete-modal-backdrop"></div>
+    <section class="complete-modal-dialog" role="dialog" aria-modal="true"
+             aria-labelledby="complete-title" aria-describedby="complete-message">
+        <div class="complete-icon" aria-hidden="true">✓</div>
+        <h2 id="complete-title">민원 접수 완료</h2>
+        <p id="complete-message">민원이 정상적으로 접수되었습니다.</p>
+        <p class="receipt-number">접수번호 <strong id="complaint-number"></strong></p>
+        <button id="complete-confirm" class="complete-confirm" type="button">확인</button>
+    </section>
+</div>
+</body>
+</html>

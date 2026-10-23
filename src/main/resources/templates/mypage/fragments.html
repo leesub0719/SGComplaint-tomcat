@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside class="mypage-sidebar" th:fragment="sidebar(activeMenu)" aria-label="마이페이지 메뉴">
+    <div class="mypage-member-summary">
+        <span>MY PAGE</span>
+        <strong th:text="${employee.empName}">홍길동</strong>
+        <small th:text="${employee.empId}">user01</small>
+    </div>
+    <nav>
+        <a th:href="@{/mypage/profile}"
+           th:classappend="${activeMenu == 'profile'} ? 'active'">정보수정</a>
+        <a th:href="@{/mypage/inquiries}"
+           th:classappend="${activeMenu == 'inquiries'} ? 'active'">문의내역</a>
+    </nav>
+</aside>
+</body>
+</html>

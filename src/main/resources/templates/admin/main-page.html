@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인페이지 관리 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <script src="../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar('메인페이지 관리', '사용자 메인에 노출할 상단 배너 이미지를 관리합니다.')}"></header>
+        <main class="admin-content">
+            <div class="flash-message success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-message error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <section class="banner-summary-grid" aria-label="메인 배너 현황">
+                <article><span>등록된 배너</span><strong th:text="${bannerCount}">0</strong><small>최대 5장</small></article>
+                <article><span>추가 가능</span><strong th:text="${remainingCount}">5</strong><small>남은 등록 수</small></article>
+                <article><span>자동 전환</span><strong>5초</strong><small>마우스를 올리면 일시정지</small></article>
+            </section>
+
+            <section class="admin-panel main-banner-panel">
+                <div class="panel-heading">
+                    <div><h2>상단 메인 배너</h2></div>
+                    <a href="/" th:href="@{/}" target="_blank" rel="noopener">메인 화면 확인 →</a>
+                </div>
+
+                <form class="main-banner-upload" method="post" enctype="multipart/form-data"
+                      data-main-banner-form th:attr="data-remaining=${remainingCount}"
+                      action="/admin/main-page/banners" th:action="@{/admin/main-page/banners}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <label for="banner-images">
+                        <span class="banner-upload-icon">＋</span>
+                        <strong>메인 배너 이미지 선택</strong>
+                        <small>JPG, PNG, 정지 WEBP · 장당 최대 10MB · 전체 최대 5장 · 가로·세로 10,000px 및 2,000만 화소 이하</small>
+                    </label>
+                    <input id="banner-images" type="file" name="bannerImages" multiple required
+                           accept=".jpg,.jpeg,.png,.webp" data-main-banner-input
+                           th:disabled="${remainingCount == 0}">
+                    <p data-main-banner-names th:text="${remainingCount == 0 ? '최대 5장이 모두 등록되어 있습니다.' : '선택된 이미지가 없습니다.'}">선택된 이미지가 없습니다.</p>
+                    <button type="submit" th:disabled="${remainingCount == 0}">배너 등록</button>
+                </form>
+
+                <div class="main-banner-list" th:if="${!#lists.isEmpty(banners)}">
+                    <article class="main-banner-card" th:each="banner, stat : ${banners}">
+                        <div class="banner-order" th:text="${stat.count}">1</div>
+                        <div class="banner-preview"><img th:src="@{${banner.imageUrl}}" th:alt="${banner.originalName}"></div>
+                        <div class="banner-information">
+                            <strong th:text="${banner.originalName}">배너.jpg</strong>
+                            <p><span th:text="${banner.formattedSize}">1 MB</span> · <span th:text="${banner.createdDateTime}">2026.08.21</span></p>
+                            <small>등록 관리자 <b th:text="${banner.createdBy}">admin</b></small>
+                        </div>
+                        <form method="post" data-main-banner-delete
+                              th:action="@{/admin/main-page/banners/{bannerNo}/delete(bannerNo=${banner.bannerNo})}">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit">삭제</button>
+                        </form>
+                    </article>
+                </div>
+                <div class="main-banner-empty" th:if="${#lists.isEmpty(banners)}">
+                    <span>▧</span><strong>등록된 메인 배너가 없습니다.</strong><p>현재는 기본 버스 이미지가 메인 화면에 표시됩니다.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.mapper.EmployeeMapper">
+  <resultMap id="employee" type="com.transit.SGComplaint.domain.Employee">
+    <id property="empNo" column="emp_no"/><result property="empId" column="emp_id"/>
+    <result property="empPassword" column="emp_password"/><result property="empName" column="emp_name"/>
+    <result property="empEmail" column="emp_email"/><result property="empPhone" column="emp_phone"/>
+    <result property="empAddress" column="emp_address"/><result property="empRole" column="emp_role"/>
+    <result property="empStatus" column="emp_status"/><result property="createdAt" column="created_at"/>
+    <result property="updatedAt" column="updated_at"/>
+    <result property="withdrawalOriginalId" column="withdrawal_original_id"/>
+  </resultMap>
+  <sql id="columns">emp_no,emp_id,emp_password,emp_name,emp_email,emp_phone,emp_address,emp_role,emp_status,created_at,updated_at</sql>
+
+    <select id="existsByEmpId" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+        FROM sgtransit_employee
+        WHERE emp_id=#{empId})
+    </select>
+
+    <select id="existsByEmpIdAndEmpStatus" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM sgtransit_employee
+            WHERE emp_id=#{empId}
+              AND emp_status=#{empStatus}
+        )
+    </select>
+
+    <select id="findByEmpId" resultMap="employee">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_employee
+        WHERE emp_id=#{empId}
+        LIMIT 1
+    </select>
+
+    <select id="findByEmpIdAndEmpStatus" resultMap="employee">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_employee
+        WHERE emp_id=#{empId}
+          AND emp_status=#{empStatus}
+        LIMIT 1
+    </select>
+
+    <select id="findAllByEmpPhoneAndEmpStatusOrderByEmpNoAsc" resultMap="employee">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_employee
+        WHERE emp_phone=#{empPhone}
+          AND emp_status=#{empStatus}
+        ORDER BY emp_no
+    </select>
+
+    <select id="findByEmpIdAndEmpNameAndEmpPhoneAndEmpStatus" resultMap="employee">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_employee
+        WHERE emp_id=#{empId}
+          AND emp_name=#{empName}
+          AND emp_phone=#{empPhone}
+          AND emp_status=#{empStatus}
+        LIMIT 1
+    </select>
+
+    <select id="findById" resultMap="employee">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_employee
+        WHERE emp_no=#{empNo}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_employee
+    </select>
+
+    <select id="countByEmpStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_employee
+        WHERE emp_status=#{empStatus}
+    </select>
+
+    <select id="countByEmpRole" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_employee
+        WHERE emp_role=#{empRole}
+    </select>
+
+    <sql id="memberSearchWhere">
+        <where>
+            <if test="status != null and status != ''">emp_status=#{status}</if>
+            <if test="role != null and role != ''">AND emp_role=#{role}</if>
+            <if test="keyword != null and keyword != ''">
+                AND (emp_id LIKE CONCAT(#{keyword},'%')
+                  OR emp_name LIKE CONCAT(#{keyword},'%')
+                  OR emp_email LIKE CONCAT(#{keyword},'%')
+                  OR emp_phone LIKE CONCAT(#{keyword},'%')
+                  OR EXISTS (
+                      SELECT 1 FROM sgtransit_withdrawal_id_history wh
+                      WHERE wh.emp_no=sgtransit_employee.emp_no
+                        AND wh.original_emp_id LIKE CONCAT(#{keyword},'%')
+                  ))
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectMemberPage" resultMap="employee">
+        SELECT
+        <include refid="columns"/>,
+        (SELECT wh.original_emp_id
+           FROM sgtransit_withdrawal_id_history wh
+          WHERE wh.emp_no=sgtransit_employee.emp_no
+          ORDER BY wh.history_no DESC LIMIT 1) AS withdrawal_original_id
+        FROM sgtransit_employee
+        <include refid="memberSearchWhere"/>
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countMemberPage" resultType="long">
+        SELECT COUNT(*) FROM sgtransit_employee
+        <include refid="memberSearchWhere"/>
+    </select>
+
+    <insert id="insertEmployee" useGeneratedKeys="true" keyProperty="empNo" keyColumn="emp_no">
+        INSERT INTO sgtransit_employee (
+            emp_id,
+            emp_password,
+            emp_name,
+            emp_email,
+            emp_phone,
+            emp_address,
+            emp_role,
+            emp_status,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{empId},
+            #{empPassword},
+            #{empName},
+            #{empEmail},
+            #{empPhone},
+            #{empAddress},
+            #{empRole},
+            #{empStatus},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateEmployee">
+        UPDATE sgtransit_employee
+        SET emp_password=#{empPassword},
+            emp_name=#{empName},
+            emp_email=#{empEmail},
+            emp_phone=#{empPhone},
+            emp_address=#{empAddress},
+            emp_role=#{empRole},
+            emp_status=#{empStatus},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE emp_no=#{empNo}
+    </update>
+
+    <update id="releaseWithdrawnEmployeeId">
+        UPDATE sgtransit_employee
+        SET emp_id=#{withdrawnId},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE emp_id=#{empId}
+          AND emp_status='N'
+    </update>
+
+    <update id="anonymizeExpiredWithdrawn">
+        UPDATE sgtransit_employee
+        SET emp_password='RETIRED',
+            emp_name='탈퇴회원',
+            emp_email=CONCAT('withdrawn+', emp_no, '@invalid.local'),
+            emp_phone='',
+            emp_address=NULL,
+            updated_at=CURRENT_TIMESTAMP
+        WHERE emp_status='N'
+          AND updated_at &lt; #{cutoff}
+          AND emp_name &lt;&gt; '탈퇴회원'
+        ORDER BY emp_no
+        LIMIT #{limit}
+    </update>
+</mapper>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.ComplaintRepository">
+  <resultMap id="complaint" type="com.transit.SGComplaint.domain.Complaint"><id property="complaintNo" column="complaint_no"/><result property="empNo" column="emp_no"/><result property="empId" column="emp_id"/><result property="empName" column="emp_name"/><result property="empPhone" column="emp_phone"/><result property="category" column="complaint_category"/><result property="title" column="complaint_title"/><result property="content" column="complaint_content"/><result property="password" column="complaint_password"/><result property="status" column="complaint_status" javaType="com.transit.SGComplaint.domain.ComplaintStatus"/><result property="version" column="version"/><result property="createdAt" column="created_at"/><result property="updatedAt" column="updated_at"/></resultMap>
+  <sql id="columns">complaint_no,emp_no,emp_id,emp_name,emp_phone,complaint_category,complaint_title,complaint_content,complaint_password,complaint_status,version,created_at,updated_at</sql>
+
+    <select id="selectMemberPage" resultMap="complaint">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_complaint
+        WHERE emp_no=#{empNo}
+          AND created_at &gt;= #{startDateTime}
+          AND created_at &lt; #{endDateTime}
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countMemberPage" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_complaint
+        WHERE emp_no=#{empNo}
+          AND created_at &gt;= #{startDateTime}
+          AND created_at &lt; #{endDateTime}
+    </select>
+
+    <select id="findAllByOrderByCreatedAtDesc" resultMap="complaint">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_complaint
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findByStatusOrderByCreatedAtDesc" resultMap="complaint">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_complaint
+        WHERE complaint_status=#{status}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findTop5ByOrderByCreatedAtDesc" resultMap="complaint">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_complaint
+        ORDER BY created_at DESC
+        LIMIT 5
+    </select>
+
+    <select id="findById" resultMap="complaint">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_complaint
+        WHERE complaint_no=#{complaintNo}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_complaint
+    </select>
+
+    <select id="countByStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_complaint
+        WHERE complaint_status=#{status}
+    </select>
+
+    <select id="selectAdminPage" resultMap="complaint">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_complaint
+        <if test="status != null">
+        WHERE complaint_status=#{status}
+        </if>
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countAdminPage" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_complaint
+        <if test="status != null">
+        WHERE complaint_status=#{status}
+        </if>
+
+    </select>
+	<sql id="publicWhere">
+		<where>
+			<if test="category != null and category != ''">complaint_category=#{category}</if>
+			<if test="keyword != null and keyword != ''">AND complaint_title LIKE CONCAT(#{keyword},'%') OR emp_name LIKE CONCAT(#{keyword},'%')</if>
+		</where>
+	</sql>
+
+    <select id="selectPublicPage" resultMap="complaint">
+        SELECT
+        <include refid="columns"/>
+        FROM sgtransit_complaint
+        <include refid="publicWhere"/>
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
+    <select id="countPublicPage" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_complaint
+        <include refid="publicWhere"/>
+
+    </select>
+
+    <insert id="insertComplaint" useGeneratedKeys="true" keyProperty="complaintNo" keyColumn="complaint_no">
+        INSERT INTO sgtransit_complaint (
+            emp_no,
+            emp_id,
+            emp_name,
+            emp_phone,
+            complaint_category,
+            complaint_title,
+            complaint_content,
+            complaint_password,
+            complaint_status,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{empNo},
+            #{empId},
+            #{empName},
+            #{empPhone},
+            #{category},
+            #{title},
+            #{content},
+            #{password},
+            #{status},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateComplaint">
+        UPDATE sgtransit_complaint
+        SET complaint_status=#{status},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE complaint_no=#{complaintNo}
+    </update>
+
+    <update id="updateStatusWithVersion">
+        UPDATE sgtransit_complaint
+        SET complaint_status=#{status},
+            version=version+1,
+            updated_at=CURRENT_TIMESTAMP
+        WHERE complaint_no=#{complaintNo}
+          AND version=#{expectedVersion}
+    </update>
+
+    <update id="updateMemberContent">
+        UPDATE sgtransit_complaint
+        SET complaint_category=#{category},
+            complaint_title=#{title},
+            complaint_content=#{content},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE complaint_no=#{complaintNo}
+          AND emp_no=#{empNo}
+          AND complaint_status='CHECKING'
+    </update>
+
+    <delete id="deleteMemberComplaint">
+        DELETE FROM sgtransit_complaint
+        WHERE complaint_no=#{complaintNo}
+          AND emp_no=#{empNo}
+          AND complaint_status='CHECKING'
+    </delete>
+
+    <update id="anonymizeExpiredCompleted">
+        UPDATE sgtransit_complaint
+        SET emp_id='retained-record',
+            emp_name='민원인',
+            emp_phone='',
+            updated_at=CURRENT_TIMESTAMP
+        WHERE complaint_status='COMPLETED'
+          AND updated_at &lt; #{cutoff}
+          AND emp_name &lt;&gt; '민원인'
+        ORDER BY complaint_no
+        LIMIT #{limit}
+    </update>
+</mapper>

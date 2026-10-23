@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 완료 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { min-height: 100vh; margin: 0; color: #18211e; background: #f4f8f7; font-family: "Malgun Gothic", sans-serif; }
+        main { width: min(480px, calc(100% - 40px)); margin: 70px auto; padding: 48px; text-align: center; background: #fff; border: 1px solid #dbe4e1; border-radius: 18px; box-shadow: 0 16px 40px rgba(30,73,62,.09); }
+        .icon { width: 72px; height: 72px; display: grid; place-items: center; margin: 0 auto 20px; color: #fff; background: #08745f; border-radius: 50%; font-size: 36px; }
+        h1 { margin: 0; font-size: 28px; }
+        p { margin: 13px 0 28px; color: #6d7673; line-height: 1.7; }
+        a { display: inline-flex; min-width: 180px; height: 50px; align-items: center; justify-content: center; color: #fff; background: #08745f; border-radius: 9px; font-weight: 700; text-decoration: none; }
+    </style>
+</head>
+<body>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<section th:replace="~{fragments/public-layout :: subHero('/images/subpages/signup-complete-hero.png', '회원가입 완료')}"></section>
+<main>
+    <div class="icon" aria-hidden="true">✓</div>
+    <h1>회원가입이 완료되었습니다.</h1>
+    <p>회원번호 <strong th:text="${empNo}">1</strong>번으로 가입되었습니다.<br>이제 로그인 후 서비스를 이용할 수 있습니다.</p>
+    <a href="/login" th:href="@{/login}">로그인하기</a>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="app-context-path" content="/" th:content="@{/}">
+    <title th:text="${notice.title + ' | (주) 서경 마을버스'}">공지사항 상세</title>
+    <link rel="stylesheet" href="../../static/css/notice.css" th:href="@{/css/notice.css}">
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <script src="../../static/js/app-context.js" th:src="@{/js/app-context.js}" defer></script>
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<section th:replace="~{fragments/public-layout :: subHero('/images/subpages/notice-detail-hero.png', '공지사항')}"></section>
+<main class="notice-page detail-page">
+    <article class="notice-detail">
+        <div class="detail-labels"><span th:text="${notice.categoryLabel}">일반 안내</span><b th:if="${notice.pinned}">상단 고정</b></div>
+        <h1 th:text="${notice.title}">공지사항 제목</h1>
+        <dl><div><dt>등록일</dt><dd th:text="${notice.registeredDateTime}">2026.08.21</dd></div><div><dt>작성자</dt><dd th:text="${notice.administratorName}">관리자</dd></div><div><dt>조회수</dt><dd th:text="${notice.viewCount}">0</dd></div></dl>
+        <section><h2 class="sr-only">공지사항 내용</h2><div class="notice-rich-content"
+             data-contextual-content th:utext="${notice.content}">공지사항 내용</div></section>
+        <div class="detail-actions"><a href="/notices" th:href="@{/notices}">목록으로 돌아가기</a></div>
+    </article>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

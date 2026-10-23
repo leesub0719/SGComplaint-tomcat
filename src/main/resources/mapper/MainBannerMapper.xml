@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.mapper.MainBannerMapper">
+    <resultMap id="bannerMap" type="com.transit.SGComplaint.domain.MainBanner">
+        <id property="bannerNo" column="banner_no"/>
+        <result property="originalName" column="original_name"/>
+        <result property="storedName" column="stored_name"/>
+        <result property="filePath" column="file_path"/>
+        <result property="contentType" column="content_type"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="displayOrder" column="display_order"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findAllOrdered" resultMap="bannerMap">
+        SELECT banner_no, original_name, stored_name, file_path, content_type, file_size, display_order, created_by, created_at
+        FROM sgtransit_main_banner
+        ORDER BY display_order ASC, banner_no ASC
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_main_banner
+    </select>
+
+    <select id="findMaximumDisplayOrder" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(display_order), 0)
+        FROM sgtransit_main_banner
+    </select>
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.mapper.SignupConsentMapper">
+
+    <insert id="insertSignupConsent">
+        INSERT INTO sgtransit_signup_consent (
+            emp_no,
+            terms_version,
+            privacy_version,
+            terms_agreed_at,
+            privacy_agreed_at,
+            age_confirmed_at,
+            created_at
+        ) VALUES (
+            #{empNo},
+            #{termsVersion},
+            #{privacyVersion},
+            #{agreedAt},
+            #{agreedAt},
+            #{agreedAt},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+</mapper>

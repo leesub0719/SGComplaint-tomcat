@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.ComplaintAttachmentRepository">
+  <resultMap id="attachment" type="com.transit.SGComplaint.domain.ComplaintAttachment"><id property="attachmentNo" column="attachment_no"/><result property="complaintNo" column="complaint_no"/><result property="originalName" column="original_name"/><result property="storedName" column="stored_name"/><result property="filePath" column="file_path"/><result property="contentType" column="content_type"/><result property="fileSize" column="file_size"/><result property="createdAt" column="created_at"/></resultMap>
+
+    <select id="findByComplaintNoInOrderByAttachmentNoAsc" resultMap="attachment">
+        SELECT *
+        FROM sgtransit_complaint_attachment
+        WHERE complaint_no IN
+        <foreach collection="complaintNumbers" item="id" open="(" separator="," close=")">
+        #{id}
+        </foreach>
+        ORDER BY attachment_no
+    </select>
+
+    <select id="findById" resultMap="attachment">
+        SELECT *
+        FROM sgtransit_complaint_attachment
+        WHERE attachment_no=#{attachmentNo}
+    </select>
+
+    <select id="findExpiredCompleted" resultMap="attachment">
+        SELECT a.*
+        FROM sgtransit_complaint_attachment a
+        JOIN sgtransit_complaint c ON c.complaint_no=a.complaint_no
+        WHERE c.complaint_status='COMPLETED'
+          AND c.updated_at &lt; #{cutoff}
+        ORDER BY a.attachment_no
+        LIMIT #{limit}
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM sgtransit_complaint_attachment WHERE attachment_no=#{attachmentNo}
+    </delete>
+
+    <insert id="insertAttachment" useGeneratedKeys="true" keyProperty="attachmentNo" keyColumn="attachment_no">
+        INSERT INTO sgtransit_complaint_attachment (
+            complaint_no,
+            original_name,
+            stored_name,
+            file_path,
+            content_type,
+            file_size,
+            created_at
+        ) VALUES (
+            #{complaintNo},
+            #{originalName},
+            #{storedName},
+            #{filePath},
+            #{contentType},
+            #{fileSize},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+</mapper>

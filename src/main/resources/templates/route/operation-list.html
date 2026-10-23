@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title + ' 노선운행안내 | (주) 서경 마을버스'}">노선운행안내 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <link rel="stylesheet" href="../../static/css/route-operation.css" th:href="@{/css/route-operation.css}">
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<section th:replace="~{fragments/public-layout :: subHero(${pageHeroImage}, '노선운행안내')}"></section>
+
+<main class="route-page">
+    <div class="route-page-inner">
+        <nav class="route-type-tabs" aria-label="버스 유형 선택">
+            <a th:href="@{/route/village-bus}"
+               th:classappend="${activeRouteType == 'VILLAGE'} ? 'active'">마을버스</a>
+            <a th:href="@{/route/ddokbus}"
+               th:classappend="${activeRouteType == 'DDOK'} ? 'active'">똑버스</a>
+        </nav>
+
+        <header class="route-section-heading">
+            <p>ROUTE INFORMATION</p>
+            <h2><span th:text="${title}">마을버스</span> 운행안내</h2>
+            <span th:text="${activeRouteType == 'DDOK' ? '등록된 똑버스 안내 이미지를 확인할 수 있습니다.' : '등록된 노선의 운행 정보와 상세 노선 링크를 확인할 수 있습니다.'}">등록된 노선 정보를 확인할 수 있습니다.</span>
+        </header>
+
+        <section class="route-card-grid" aria-label="마을버스 노선 목록"
+                 th:if="${activeRouteType == 'VILLAGE'}">
+            <article class="route-card" th:each="route : ${routes}">
+                <h3 th:text="${route.busName}">마을버스 01</h3>
+                <dl>
+                    <div><dt>기점 - 종점</dt><dd th:text="${route.terminalInfo}">기점 - 종점</dd></div>
+                    <div><dt>배차 간격</dt><dd th:text="${route.dispatchInterval}">평일 10분</dd></div>
+                    <div><dt>문의 전화</dt><dd th:text="${route.inquiryPhone}">032-000-0000</dd></div>
+                </dl>
+                <a class="route-guide-button" th:href="${route.routeUrl}"
+                   target="_blank" rel="noopener noreferrer">
+                    <span aria-hidden="true">➤</span> 노선안내
+                </a>
+            </article>
+        </section>
+
+        <section class="ddok-guide-gallery" aria-label="똑버스 안내 이미지"
+                 th:if="${activeRouteType == 'DDOK' and !#lists.isEmpty(ddokBusImages)}">
+            <figure class="ddok-guide-image" th:each="image : ${ddokBusImages}">
+                <img th:src="@{${image.imageUrl}}" th:alt="${'똑버스 안내 - ' + image.originalName}">
+            </figure>
+        </section>
+
+        <div class="route-empty"
+             th:if="${(activeRouteType == 'VILLAGE' and #lists.isEmpty(routes)) or (activeRouteType == 'DDOK' and #lists.isEmpty(ddokBusImages))}">
+            <strong th:text="${title + ' 운행정보를 준비 중입니다.'}">운행정보를 준비 중입니다.</strong>
+            <p>관리자 페이지에서 노선을 등록하면 이곳에 표시됩니다.</p>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.ComplaintAnswerAttachmentRepository">
+  <resultMap id="attachment" type="com.transit.SGComplaint.domain.ComplaintAnswerAttachment"><id property="answerAttachmentNo" column="answer_attachment_no"/><result property="answerNo" column="answer_no"/><result property="originalName" column="original_name"/><result property="storedName" column="stored_name"/><result property="filePath" column="file_path"/><result property="contentType" column="content_type"/><result property="fileSize" column="file_size"/><result property="createdAt" column="created_at"/></resultMap>
+
+    <select id="findByAnswerNoInOrderByAnswerAttachmentNoAsc" resultMap="attachment">
+        SELECT *
+        FROM sgtransit_complaint_answer_attachment
+        WHERE answer_no IN
+        <foreach collection="answerNumbers" item="id" open="(" separator="," close=")">
+        #{id}
+        </foreach>
+        ORDER BY answer_attachment_no
+    </select>
+
+    <select id="findById" resultMap="attachment">
+        SELECT *
+        FROM sgtransit_complaint_answer_attachment
+        WHERE answer_attachment_no=#{attachmentNo}
+    </select>
+
+    <select id="countByAnswerNo" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_complaint_answer_attachment
+        WHERE answer_no=#{answerNo}
+    </select>
+
+    <select id="findExpiredCompleted" resultMap="attachment">
+        SELECT aa.*
+        FROM sgtransit_complaint_answer_attachment aa
+        JOIN sgtransit_complaint_answer ans ON ans.answer_no=aa.answer_no
+        JOIN sgtransit_complaint c ON c.complaint_no=ans.complaint_no
+        WHERE c.complaint_status='COMPLETED'
+          AND c.updated_at &lt; #{cutoff}
+        ORDER BY aa.answer_attachment_no
+        LIMIT #{limit}
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM sgtransit_complaint_answer_attachment
+        WHERE answer_attachment_no=#{attachmentNo}
+    </delete>
+
+    <insert id="insertAttachment" useGeneratedKeys="true" keyProperty="answerAttachmentNo" keyColumn="answer_attachment_no">
+        INSERT INTO sgtransit_complaint_answer_attachment (
+            answer_no,
+            original_name,
+            stored_name,
+            file_path,
+            content_type,
+            file_size,
+            created_at
+        ) VALUES (
+            #{answerNo},
+            #{originalName},
+            #{storedName},
+            #{filePath},
+            #{contentType},
+            #{fileSize},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+</mapper>

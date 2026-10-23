@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공지사항 관리 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <script src="../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar('공지사항', '등록된 공지사항을 확인하고 관리합니다.')}"></header>
+        <main class="admin-content">
+            <div class="flash-message success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-message error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <section class="admin-panel recent-panel notice-board-panel">
+                <div class="panel-heading notice-list-heading">
+                    <div>
+                        <h2>최근 등록 공지사항</h2>
+                        <p>전체 <strong th:text="${noticePage.totalElements}">0</strong>건 · 한 페이지에 10건씩 표시됩니다.</p>
+                    </div>
+                    <a class="admin-primary-button" href="/admin/notices/new" th:href="@{/admin/notices/new}">＋ 공지사항 등록</a>
+                </div>
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table notice-management-table">
+                        <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>분류</th>
+                            <th>제목</th>
+                            <th>게시 설정</th>
+                            <th>메인 팝업</th>
+                            <th>등록일</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="notice : ${notices}">
+                            <td th:text="${notice.noticeNo}">1</td>
+                            <td><span class="notice-category-badge" th:text="${notice.categoryLabel}">일반 안내</span></td>
+                            <td class="title-cell">
+                                <a th:href="@{/notices/{noticeNo}(noticeNo=${notice.noticeNo})}"
+                                   target="_blank" th:text="${notice.title}">공지사항 제목</a>
+                            </td>
+                            <td><span th:classappend="${notice.pinned ? 'notice-setting-on' : 'notice-setting-off'}"
+                                      th:text="${notice.pinned ? '상단 고정' : '일반'}">일반</span></td>
+                            <td>
+                                <form class="notice-popup-toggle-form" method="post"
+                                      th:action="@{/admin/notices/{noticeNo}/popup(noticeNo=${notice.noticeNo})}"
+                                      data-notice-popup-form>
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="page" th:value="${noticePage.number}">
+                                    <label class="notice-popup-toggle">
+                                        <input type="checkbox" name="popup" value="true"
+                                               th:checked="${notice.popup}" data-notice-popup-toggle>
+                                        <span th:text="${notice.popup ? '사용' : '미사용'}">미사용</span>
+                                    </label>
+                                </form>
+                            </td>
+                            <td th:text="${notice.registeredDate}">2026.08.24</td>
+                            <td>
+                                <div class="notice-row-actions">
+                                    <a class="notice-edit-button"
+                                       th:href="@{/admin/notices/{noticeNo}/edit(noticeNo=${notice.noticeNo})}">수정</a>
+                                    <form method="post"
+                                          th:action="@{/admin/notices/{noticeNo}/delete(noticeNo=${notice.noticeNo})}"
+                                          data-notice-delete-form>
+                                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <button class="notice-delete-button" type="submit">삭제</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(notices)}">
+                            <td class="table-empty" colspan="7">등록된 공지사항이 없습니다.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="admin-pagination" th:if="${noticePage.totalPages > 1}" aria-label="공지사항 목록 페이지">
+                    <span class="disabled" th:if="${noticePage.first}">이전</span>
+                    <a th:unless="${noticePage.first}"
+                       th:href="@{/admin/notices(page=${noticePage.number - 1})}">이전</a>
+                    <a th:each="pageNo : ${#numbers.sequence(startPage, endPage)}"
+                       th:href="@{/admin/notices(page=${pageNo})}"
+                       th:classappend="${pageNo == noticePage.number} ? 'active'"
+                       th:attr="aria-current=${pageNo == noticePage.number ? 'page' : null}"
+                       th:text="${pageNo + 1}">1</a>
+                    <span class="disabled" th:if="${noticePage.last}">다음</span>
+                    <a th:unless="${noticePage.last}"
+                       th:href="@{/admin/notices(page=${noticePage.number + 1})}">다음</a>
+                </nav>
+            </section>
+        </main>
+    </div>
+</div>
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

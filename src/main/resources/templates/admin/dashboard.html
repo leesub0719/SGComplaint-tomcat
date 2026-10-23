@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <script src="../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar('대시보드', '민원 처리 현황과 주요 업무를 확인합니다.')}"></header>
+        <main class="admin-content">
+            <section class="stat-grid" aria-label="업무 현황">
+                <article class="stat-card" th:classappend="${selectedStatus == 'ALL'} ? 'selected'">
+                    <span class="stat-icon green">▤</span><div><p>전체 민원</p><a class="stat-number" th:href="@{/admin(status='ALL',page=0)}" th:text="${totalComplaints}">0</a><small>누적 접수</small></div>
+                </article>
+                <article class="stat-card" th:classappend="${selectedStatus == 'CHECKING'} ? 'selected'">
+                    <span class="stat-icon yellow">◷</span><div><p>확인중</p><a class="stat-number" th:href="@{/admin(status='CHECKING',page=0)}" th:text="${checkingCount}">0</a><small>확인 필요</small></div>
+                </article>
+                <article class="stat-card" th:classappend="${selectedStatus == 'PROCESSING'} ? 'selected'">
+                    <span class="stat-icon blue">↻</span><div><p>처리중</p><a class="stat-number" th:href="@{/admin(status='PROCESSING',page=0)}" th:text="${processingCount}">0</a><small>담당자 처리</small></div>
+                </article>
+                <article class="stat-card" th:classappend="${selectedStatus == 'COMPLETED'} ? 'selected'">
+                    <span class="stat-icon mint">✓</span><div><p>답변완료</p><a class="stat-number" th:href="@{/admin(status='COMPLETED',page=0)}" th:text="${completedCount}">0</a><small>처리 완료</small></div>
+                </article>
+            </section>
+
+            <section class="dashboard-grid">
+                <article class="admin-panel recent-panel">
+                    <div class="panel-heading"><div><h2><b th:text="${selectedStatusLabel}">전체</b> 민원</h2></div><a href="/admin/complaints" th:href="@{/admin/complaints(status=${selectedStatus})}">전체보기 →</a></div>
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead><tr><th>민원번호</th><th>신청인</th><th>제목</th><th>상태</th><th>등록일</th></tr></thead>
+                            <tbody>
+                            <tr th:each="item : ${recentComplaints}">
+                                <td th:text="${item.complaintNo}">1</td><td th:text="${item.memberName}">회원</td>
+                                <td class="title-cell"><button class="complaint-title-button" type="button" th:attr="data-complaint-modal-open=${'complaint-modal-' + item.complaintNo}" th:text="${item.title}">제목</button></td>
+                                <td><span class="admin-status" th:classappend="${item.statusCssClass}" th:text="${item.statusLabel}">확인중</span></td>
+                                <td th:text="${item.registeredDateTime}">2026.08.20</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(recentComplaints)}"><td class="table-empty" colspan="5">접수된 민원이 없습니다.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav class="admin-pagination" th:if="${complaintPage.totalPages > 1}" aria-label="민원 목록 페이지">
+                        <span class="disabled" th:if="${complaintPage.first}">이전</span>
+                        <a th:unless="${complaintPage.first}" th:href="@{/admin(status=${selectedStatus},page=${complaintPage.number - 1})}">이전</a>
+                        <a th:each="pageNo : ${#numbers.sequence(0, complaintPage.totalPages - 1)}"
+                           th:href="@{/admin(status=${selectedStatus},page=${pageNo})}"
+                           th:classappend="${pageNo == complaintPage.number} ? 'active'"
+                           th:text="${pageNo + 1}">1</a>
+                        <span class="disabled" th:if="${complaintPage.last}">다음</span>
+                        <a th:unless="${complaintPage.last}" th:href="@{/admin(status=${selectedStatus},page=${complaintPage.number + 1})}">다음</a>
+                    </nav>
+                </article>
+                <aside class="admin-panel quick-panel">
+                    <div class="panel-heading"><div><h2>빠른 업무</h2></div></div>
+                    <a href="/admin/complaints?status=CHECKING" th:href="@{/admin/complaints(status='CHECKING')}"><span>확인 대기 민원</span><strong th:text="${checkingCount}">0</strong></a>
+                    <a href="/admin/notices/new" th:href="@{/admin/notices/new}"><span>공지사항 등록</span><b>바로가기</b></a>
+                    <a href="/admin/members" th:href="@{/admin/members}"><span>이용 회원</span><strong th:text="${activeMemberCount}">0</strong></a>
+                </aside>
+            </section>
+        </main>
+    </div>
+</div>
+<th:block th:each="item : ${recentComplaints}"><div th:replace="~{admin/fragments :: complaintModal(${item})}"></div></th:block>
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

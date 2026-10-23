@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# TOMCAT_HOME/bin/setenv.sh로 복사한 뒤 소유권과 읽기 권한을 제한하세요.
+# 실제 비밀값이 들어간 setenv.sh는 Git에 커밋하지 않습니다.
+
+export SPRING_PROFILES_ACTIVE="prod,tomcat"
+export DB_URL="jdbc:mysql://127.0.0.1:3306/sgcomplaint?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8"
+export DB_USERNAME="sgcomplaint_app"
+export DB_PASSWORD="replace-me"
+export REMEMBER_ME_KEY="replace-with-at-least-32-random-characters"
+
+export SOLAPI_API_KEY=""
+export SOLAPI_API_SECRET=""
+export SOLAPI_SENDER=""
+
+export COMPLAINT_UPLOAD_DIR="/var/lib/sgcomplaint/uploads/complaints"
+export ANSWER_UPLOAD_DIR="/var/lib/sgcomplaint/uploads/answers"
+export NOTICE_IMAGE_UPLOAD_DIR="/var/lib/sgcomplaint/uploads/notices"
+export MAIN_BANNER_UPLOAD_DIR="/var/lib/sgcomplaint/uploads/main-banners"
+export DDOKBUS_GUIDE_DIR="/var/lib/sgcomplaint/uploads/routes/ddokbus"
+
+export CATALINA_OPTS="$CATALINA_OPTS -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Seoul -XX:+ExitOnOutOfMemoryError"

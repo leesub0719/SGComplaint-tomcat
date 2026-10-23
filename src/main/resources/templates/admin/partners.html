@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>협력업체 관리 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <script src="../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar('협력업체', '협력업체 명함 정보를 등록하고 관리합니다.')}"></header>
+        <main class="admin-content">
+            <div class="flash-message success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-message error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <section class="partner-summary" aria-label="협력업체 현황">
+                <article>
+                    <span aria-hidden="true">♧</span>
+                    <div><small>등록된 협력업체</small><strong th:text="${partnerCount}">0</strong><p>명함 형태로 관리 중인 업체</p></div>
+                </article>
+                <button type="button" class="partner-create-button" data-partner-modal-open="partner-create-modal">
+                    <b aria-hidden="true">＋</b> 협력업체 등록
+                </button>
+            </section>
+
+            <section class="admin-panel partner-panel">
+                <div class="panel-heading partner-list-heading">
+                    <div><h2>협력업체 목록</h2><p>업체 이름을 클릭하면 등록된 명함 정보를 확인할 수 있습니다.</p></div>
+                    <em>검색 결과 <b th:text="${searchCount}">0</b>개</em>
+                </div>
+
+                <form class="partner-search" method="get" action="/admin/partners" th:action="@{/admin/partners}">
+                    <label class="sr-only" for="partner-keyword">협력업체 검색</label>
+                    <input id="partner-keyword" name="keyword" type="search" maxlength="100"
+                           th:value="${keyword}" placeholder="이름, 전화번호, 사이트 앞부분 검색">
+                    <button type="submit">검색</button>
+                    <a href="/admin/partners" th:href="@{/admin/partners}">초기화</a>
+                </form>
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table partner-table">
+                        <caption class="sr-only">협력업체 번호, 이름, 전화번호, 사이트, 등록일, 관리 목록</caption>
+                        <thead><tr><th>번호</th><th>이름</th><th>전화번호</th><th>사이트</th><th>등록일</th><th>관리</th></tr></thead>
+                        <tbody>
+                        <tr th:each="partner : ${partners}">
+                            <td th:text="${partner.partnerNo}">1</td>
+                            <td>
+                                <button class="partner-name-button" type="button"
+                                        th:attr="data-partner-popover-open=${'partner-popover-' + partner.partnerNo}"
+                                        th:text="${partner.name}">협력업체</button>
+                            </td>
+                            <td th:text="${partner.phone}">032-000-0000</td>
+                            <td class="partner-site-cell">
+                                <a th:if="${!#strings.isEmpty(partner.site)}" th:href="${partner.site}"
+                                   target="_blank" rel="noopener noreferrer" th:text="${partner.site}">https://example.com</a>
+                                <span th:if="${#strings.isEmpty(partner.site)}">-</span>
+                            </td>
+                            <td th:text="${partner.createdDate}">2026.08.25</td>
+                            <td>
+                                <div class="partner-row-actions">
+                                    <button type="button" class="partner-edit-button"
+                                            th:attr="data-partner-modal-open=${'partner-edit-modal-' + partner.partnerNo}">수정</button>
+                                    <form method="post" data-partner-delete
+                                          th:attr="data-partner-name=${partner.name}"
+                                          th:action="@{/admin/partners/{no}/delete(no=${partner.partnerNo})}">
+                                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <input type="hidden" name="keyword" th:value="${keyword}">
+                                        <input type="hidden" name="page" th:value="${partnerPage.number}">
+                                        <button type="submit">삭제</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(partners)}">
+                            <td class="table-empty" colspan="6">검색 조건에 해당하는 협력업체가 없습니다.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <nav class="admin-pagination partner-pagination" th:if="${partnerPage.totalPages > 0}" aria-label="협력업체 페이지 이동">
+                    <a th:classappend="${partnerPage.first} ? 'disabled'"
+                       th:href="${partnerPage.first} ? '#' : @{/admin/partners(keyword=${keyword},page=${partnerPage.number - 1})}">이전</a>
+                    <a th:each="pageNumber : ${#numbers.sequence(T(java.lang.Math).max(0, partnerPage.number - 4), T(java.lang.Math).min(partnerPage.totalPages - 1, partnerPage.number + 4))}"
+                       th:text="${pageNumber + 1}" th:classappend="${pageNumber == partnerPage.number} ? 'active'"
+                       th:href="@{/admin/partners(keyword=${keyword},page=${pageNumber})}">1</a>
+                    <a th:classappend="${partnerPage.last} ? 'disabled'"
+                       th:href="${partnerPage.last} ? '#' : @{/admin/partners(keyword=${keyword},page=${partnerPage.number + 1})}">다음</a>
+                </nav>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div id="partner-create-modal" class="partner-modal" hidden>
+    <button class="partner-modal-backdrop" type="button" data-partner-modal-close aria-label="등록창 닫기"></button>
+    <section class="partner-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="partner-create-title">
+        <header class="partner-modal-header">
+            <div><h2 id="partner-create-title">협력업체 등록</h2></div>
+            <button type="button" data-partner-modal-close aria-label="등록창 닫기">×</button>
+        </header>
+        <form class="partner-form" method="post" action="/admin/partners" th:action="@{/admin/partners}">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="partner-card-form">
+                <div class="partner-card-mark" aria-hidden="true">SG</div>
+                <div class="partner-card-fields">
+                    <label>이름 <b>*</b><input name="name" type="text" maxlength="100" required placeholder="협력업체 이름"></label>
+                    <label>전화번호 <b>*</b><input name="phone" type="tel" maxlength="30" required placeholder="032-000-0000"></label>
+                    <label class="wide">사이트<input name="site" type="text" maxlength="500" placeholder="https://example.com"></label>
+                    <label class="wide partner-notes-field">기타사항<textarea name="notes" maxlength="2000" rows="7" placeholder="담당 업무, 담당자, 참고사항 등을 입력해 주세요."></textarea></label>
+                </div>
+            </div>
+            <footer class="partner-form-actions"><button type="button" data-partner-modal-close>취소</button><button type="submit">등록하기</button></footer>
+        </form>
+    </section>
+</div>
+
+<th:block th:each="partner : ${partners}">
+    <aside class="partner-popover" th:id="${'partner-popover-' + partner.partnerNo}" hidden
+           th:attr="aria-labelledby=${'partner-popover-title-' + partner.partnerNo}">
+        <header><div><h3 th:id="${'partner-popover-title-' + partner.partnerNo}" th:text="${partner.name}">협력업체</h3></div><button type="button" data-partner-popover-close aria-label="협력업체 정보 닫기">×</button></header>
+        <dl>
+            <div><dt>전화번호</dt><dd th:text="${partner.phone}">032-000-0000</dd></div>
+            <div><dt>사이트</dt><dd><a th:if="${!#strings.isEmpty(partner.site)}" th:href="${partner.site}" target="_blank" rel="noopener noreferrer" th:text="${partner.site}">사이트 열기</a><span th:if="${#strings.isEmpty(partner.site)}">등록되지 않음</span></dd></div>
+            <div class="wide"><dt>기타사항</dt><dd class="partner-popover-notes" th:text="${#strings.isEmpty(partner.notes) ? '등록된 기타사항이 없습니다.' : partner.notes}">기타사항</dd></div>
+        </dl>
+    </aside>
+
+    <div class="partner-modal" th:id="${'partner-edit-modal-' + partner.partnerNo}" hidden>
+        <button class="partner-modal-backdrop" type="button" data-partner-modal-close aria-label="수정창 닫기"></button>
+        <section class="partner-modal-dialog" role="dialog" aria-modal="true" th:attr="aria-labelledby=${'partner-edit-title-' + partner.partnerNo}">
+            <header class="partner-modal-header">
+                <div><h2 th:id="${'partner-edit-title-' + partner.partnerNo}">협력업체 수정</h2></div>
+                <button type="button" data-partner-modal-close aria-label="수정창 닫기">×</button>
+            </header>
+            <form class="partner-form" method="post" th:action="@{/admin/partners/{no}/update(no=${partner.partnerNo})}">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="keyword" th:value="${keyword}">
+                <input type="hidden" name="page" th:value="${partnerPage.number}">
+                <div class="partner-card-form">
+                    <div class="partner-card-mark" aria-hidden="true" th:text="${#strings.substring(partner.name, 0, 1)}">S</div>
+                    <div class="partner-card-fields">
+                        <label>이름 <b>*</b><input name="name" type="text" maxlength="100" required th:value="${partner.name}"></label>
+                        <label>전화번호 <b>*</b><input name="phone" type="tel" maxlength="30" required th:value="${partner.phone}"></label>
+                        <label class="wide">사이트<input name="site" type="text" maxlength="500" th:value="${partner.site}"></label>
+                        <label class="wide partner-notes-field">기타사항<textarea name="notes" maxlength="2000" rows="7" th:text="${partner.notes}"></textarea></label>
+                    </div>
+                </div>
+                <footer class="partner-form-actions"><button type="button" data-partner-modal-close>취소</button><button type="submit">수정 저장</button></footer>
+            </form>
+        </section>
+    </div>
+</th:block>
+
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

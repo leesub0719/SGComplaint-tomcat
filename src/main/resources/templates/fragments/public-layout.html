@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="public-site-header" th:fragment="header">
+    <div class="public-page-width public-header-inner">
+        <a class="public-brand" href="/" th:href="@{/}" aria-label="(주) 서경 마을버스 홈">
+            <span class="public-brand-symbol" aria-hidden="true">013</span>
+            <span>(주) 서경 마을버스</span>
+        </a>
+
+        <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="public-main-nav">
+            <span class="public-sr-only">메뉴 열기</span>
+            <span></span><span></span><span></span>
+        </button>
+
+        <nav id="public-main-nav" class="public-main-nav" aria-label="주요 메뉴">
+            <div class="public-primary-menu">
+                <div class="public-nav-group">
+                    <button class="public-nav-main-button" type="button" data-public-submenu-toggle aria-expanded="false">회사소개 <span aria-hidden="true">⌄</span></button>
+                    <div class="public-sub-menu">
+                        <a th:href="@{/company/greeting}">인사말</a><a th:href="@{/company/history}">회사연혁</a>
+                        <a th:href="@{/company/location}">오시는길</a><a th:href="@{/company/organization}">조직도</a>
+                    </div>
+                </div>
+                <div class="public-nav-group">
+                    <button class="public-nav-main-button" type="button" data-public-submenu-toggle aria-expanded="false">노선운행안내 <span aria-hidden="true">⌄</span></button>
+                    <div class="public-sub-menu"><a th:href="@{/route/village-bus}">마을버스</a><a th:href="@{/route/ddokbus}">똑버스</a></div>
+                </div>
+                <div class="public-nav-group">
+                    <button class="public-nav-main-button" type="button" data-public-submenu-toggle aria-expanded="false">채용안내 <span aria-hidden="true">⌄</span></button>
+                    <div class="public-sub-menu"><a th:href="@{/recruit/notices}">채용공고</a></div>
+                </div>
+                <div class="public-nav-group">
+                    <button class="public-nav-main-button" type="button" data-public-submenu-toggle aria-expanded="false">고객센터 <span aria-hidden="true">⌄</span></button>
+                    <div class="public-sub-menu">
+                        <a th:href="@{/notices}">공지사항</a>
+                        <a th:href="@{/complaints(category='PRAISE')}">칭찬합니다</a>
+                        <a th:href="@{/complaints(category='COMPLAINT')}">불편합니다</a>
+                        <a th:href="@{/complaints(category='LOST')}">분실물 문의</a>
+                    </div>
+                </div>
+            </div>
+            <span class="public-auth-divider" aria-hidden="true"></span>
+            <span class="public-auth-actions" th:if="${!isLoggedIn}">
+                <a class="public-auth-button public-auth-login" th:href="@{/login}">로그인</a>
+                <a class="public-auth-button public-auth-signup" th:href="@{/signup}">회원가입</a>
+            </span>
+            <span class="public-auth-actions public-auth-member" th:if="${isLoggedIn}">
+                <span class="public-login-greeting"><strong th:text="${memberName}">홍길동</strong>님</span>
+                <span class="public-member-divider" aria-hidden="true"></span>
+                <div class="public-nav-group public-member-menu">
+                    <button class="public-member-link public-member-menu-button" type="button"
+                            data-public-submenu-toggle aria-expanded="false">
+                        마이페이지 <span aria-hidden="true">⌄</span>
+                    </button>
+                    <div class="public-sub-menu public-member-sub-menu">
+                        <a th:href="@{/mypage/profile}">정보수정</a>
+                        <a th:href="@{/mypage/inquiries}">문의내역</a>
+                    </div>
+                </div>
+                <span class="public-member-divider" th:if="${isAdmin}" aria-hidden="true"></span>
+                <a class="public-member-link public-admin-return-link" th:if="${isAdmin}" th:href="@{/admin}">관리자페이지</a>
+                <span class="public-member-divider" aria-hidden="true"></span>
+                <form method="post" th:action="@{/logout}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="public-member-link public-auth-logout" type="submit">로그아웃</button>
+                </form>
+            </span>
+        </nav>
+    </div>
+</header>
+
+<section class="subpage-hero" th:fragment="subHero(imagePath, title)" th:attr="aria-label=${title + ' 페이지 상단 이미지'}">
+    <img th:src="@{${imagePath}}" src="../../static/images/subpages/complaints-all-hero.png" alt="노란 버스와 시민이 함께 있는 거리 풍경">
+    <div class="subpage-hero-shade" aria-hidden="true"></div>
+    <div class="subpage-hero-copy">
+        <h1 th:text="${title}">페이지 제목</h1>
+    </div>
+</section>
+
+<footer class="public-company-footer" th:fragment="footer">
+    <div class="public-page-width public-company-footer-inner">
+        <div class="public-footer-brand" aria-label="(주)서경 마을버스">
+            <span class="public-footer-brand-mark" aria-hidden="true">013</span>
+            <span><strong>SEOKYOUNG</strong><b>(주)서경 마을버스</b></span>
+        </div>
+        <address class="public-footer-company-information">
+            <strong>(주)서경 마을버스</strong>
+            <p><a href="tel:0323423223">Tel. 032 342 3223</a><span aria-hidden="true"> / </span><span>Fax. 032 347 0134</span></p>
+            <p><a href="mailto:seokyoung_j@naver.com">이메일. seokyoung_j@naver.com</a></p>
+            <p>주소 : 경기도 부천시 괴안동 246번지 / 소사동로 197 (주)서경 마을버스</p>
+        </address>
+        <button class="public-footer-top-button" type="button" data-public-scroll-top aria-label="페이지 맨 위로 이동">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 11 6-6 6 6M12 5v14"/></svg>
+        </button>
+    </div>
+</footer>
+</body>
+</html>

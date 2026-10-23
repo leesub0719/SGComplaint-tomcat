@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.NoticeImageRepository">
+  <resultMap id="image" type="com.transit.SGComplaint.domain.NoticeImage"><id property="noticeImageNo" column="notice_image_no"/><result property="noticeNo" column="notice_no"/><result property="originalName" column="original_name"/><result property="storedName" column="stored_name"/><result property="filePath" column="file_path"/><result property="contentType" column="content_type"/><result property="fileSize" column="file_size"/><result property="createdAt" column="created_at"/></resultMap>
+
+    <select id="findById" resultMap="image">
+        SELECT *
+        FROM sgtransit_notice_image
+        WHERE notice_image_no=#{noticeImageNo}
+    </select>
+
+    <select id="findByNoticeNo" resultMap="image">
+        SELECT *
+        FROM sgtransit_notice_image
+        WHERE notice_no=#{noticeNo}
+        ORDER BY notice_image_no ASC
+    </select>
+
+    <insert id="insertImage" useGeneratedKeys="true" keyProperty="noticeImageNo" keyColumn="notice_image_no">
+        INSERT INTO sgtransit_notice_image (
+            notice_no,
+            original_name,
+            stored_name,
+            file_path,
+            content_type,
+            file_size,
+            created_at
+        ) VALUES (
+            #{noticeNo},
+            #{originalName},
+            #{storedName},
+            #{filePath},
+            #{contentType},
+            #{fileSize},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <delete id="deleteById">
+        DELETE
+        FROM sgtransit_notice_image
+        WHERE notice_image_no=#{noticeImageNo}
+    </delete>
+
+    <delete id="deleteByNoticeNo">
+        DELETE
+        FROM sgtransit_notice_image
+        WHERE notice_no=#{noticeNo}
+    </delete>
+</mapper>

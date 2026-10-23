@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.mapper.WithdrawalHistoryMapper">
+    <insert id="insert">
+        INSERT INTO sgtransit_withdrawal_id_history (
+            emp_no, original_emp_id, replacement_emp_id,
+            change_reason, changed_by, created_at, purge_after
+        ) VALUES (
+            #{empNo}, #{originalEmpId}, #{replacementEmpId},
+            #{changeReason}, #{changedBy}, CURRENT_TIMESTAMP, #{purgeAfter}
+        )
+    </insert>
+
+    <delete id="deleteExpired">
+        DELETE FROM sgtransit_withdrawal_id_history
+        WHERE purge_after &lt;= #{cutoff}
+        ORDER BY history_no
+        LIMIT #{limit}
+    </delete>
+</mapper>

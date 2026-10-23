@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="(주) 서경 마을버스 아이디 찾기">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="app-context-path" content="/" th:content="@{/}">
+    <title>아이디 찾기 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/account-recovery.css" th:href="@{/css/account-recovery.css}">
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <script src="../../static/js/app-context.js" th:src="@{/js/app-context.js}" defer></script>
+    <script src="../../static/js/find-id.js" th:src="@{/js/find-id.js}" defer></script>
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#recovery-main">아이디 찾기 내용으로 바로가기</a>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+
+<main id="recovery-main" class="recovery-page">
+    <a class="recovery-brand" href="/" th:href="@{/}" aria-label="(주) 서경 마을버스 메인으로">
+        <span class="brand-mark" aria-hidden="true">013</span>
+        <span>(주) 서경 마을버스</span>
+    </a>
+
+    <section class="recovery-card" aria-labelledby="recovery-title">
+        <div class="recovery-heading">
+            <span class="eyebrow">ACCOUNT RECOVERY</span>
+            <h1 id="recovery-title">아이디 찾기</h1>
+            <p>가입할 때 등록한 휴대전화 번호로 본인인증을 진행해 주세요.</p>
+        </div>
+
+        <ol class="step-indicator" aria-label="아이디 찾기 진행 단계">
+            <li class="is-current" data-step-indicator="1"><span>1</span>정보 입력</li>
+            <li data-step-indicator="2"><span>2</span>본인인증</li>
+            <li data-step-indicator="3"><span>3</span>아이디 확인</li>
+        </ol>
+
+        <section class="recovery-step is-active" data-step="1">
+            <div class="field">
+                <label for="find-phone">휴대전화 번호</label>
+                <input id="find-phone" type="tel" inputmode="numeric" autocomplete="tel"
+                       maxlength="11" placeholder="숫자만 입력해 주세요">
+                <p id="phone-message" class="field-message" aria-live="polite"></p>
+            </div>
+            <button id="request-find-code" class="primary-button" type="button">인증번호 받기</button>
+        </section>
+
+        <section class="recovery-step" data-step="2" hidden>
+            <div class="summary-box">
+                <span>인증번호 전송 번호</span>
+                <strong id="find-phone-summary"></strong>
+            </div>
+            <div class="field">
+                <label for="find-code">인증번호</label>
+                <div class="code-wrap">
+                    <input id="find-code" type="text" inputmode="numeric" autocomplete="one-time-code"
+                           maxlength="6" placeholder="인증번호 6자리">
+                    <span id="find-timer" class="timer">03:00</span>
+                </div>
+                <p id="code-message" class="field-message" aria-live="polite"></p>
+            </div>
+            <button id="verify-find-code" class="primary-button" type="button">인증하고 아이디 찾기</button>
+            <button id="resend-find-code" class="text-button" type="button">인증번호 다시 받기</button>
+        </section>
+
+        <section class="recovery-step result-step" data-step="3" hidden>
+            <div class="success-icon" aria-hidden="true">✓</div>
+            <h2>아이디를 찾았습니다</h2>
+            <p>입력하신 휴대전화 번호로 가입된 아이디입니다.</p>
+            <div id="found-id-list" class="found-id-list"></div>
+            <a class="primary-button button-link" href="/login" th:href="@{/login}">로그인하기</a>
+            <a class="text-button button-link" href="/account/reset-password"
+               th:href="@{/account/reset-password}">비밀번호도 찾기</a>
+        </section>
+    </section>
+
+    <nav class="recovery-links" aria-label="계정 도움말">
+        <a href="/login" th:href="@{/login}">로그인</a>
+        <span aria-hidden="true"></span>
+        <a href="/account/reset-password" th:href="@{/account/reset-password}">비밀번호 찾기</a>
+        <span aria-hidden="true"></span>
+        <a href="/signup" th:href="@{/signup}">회원가입</a>
+    </nav>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

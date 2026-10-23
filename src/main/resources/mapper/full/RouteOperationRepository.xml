@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.RouteOperationRepository">
+  <resultMap id="route" type="com.transit.SGComplaint.domain.RouteOperation"><id property="routeNo" column="route_no"/><result property="routeType" column="route_type"/><result property="busName" column="bus_name"/><result property="terminalInfo" column="terminal_info"/><result property="dispatchInterval" column="dispatch_interval"/><result property="inquiryPhone" column="inquiry_phone"/><result property="routeUrl" column="route_url"/><result property="status" column="route_status"/><result property="createdAt" column="created_at"/><result property="updatedAt" column="updated_at"/></resultMap>
+
+    <select id="findById" resultMap="route">
+        SELECT *
+        FROM sgtransit_route_operation
+        WHERE route_no=#{routeNo}
+    </select>
+
+    <insert id="insertRoute" useGeneratedKeys="true" keyProperty="routeNo" keyColumn="route_no">
+        INSERT INTO sgtransit_route_operation (
+            route_type,
+            bus_name,
+            terminal_info,
+            dispatch_interval,
+            inquiry_phone,
+            route_url,
+            route_status,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{routeType},
+            #{busName},
+            #{terminalInfo},
+            #{dispatchInterval},
+            #{inquiryPhone},
+            #{routeUrl},
+            #{status},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="updateRoute">
+        UPDATE sgtransit_route_operation
+        SET route_type=#{routeType},
+            bus_name=#{busName},
+            terminal_info=#{terminalInfo},
+            dispatch_interval=#{dispatchInterval},
+            inquiry_phone=#{inquiryPhone},
+            route_url=#{routeUrl},
+            route_status=#{status},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE route_no=#{routeNo}
+    </update>
+</mapper>

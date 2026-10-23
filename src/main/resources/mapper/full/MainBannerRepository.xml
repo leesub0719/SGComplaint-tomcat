@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.repository.MainBannerRepository">
+  <resultMap id="banner" type="com.transit.SGComplaint.domain.MainBanner"><id property="bannerNo" column="banner_no"/><result property="originalName" column="original_name"/><result property="storedName" column="stored_name"/><result property="filePath" column="file_path"/><result property="contentType" column="content_type"/><result property="fileSize" column="file_size"/><result property="displayOrder" column="display_order"/><result property="createdBy" column="created_by"/><result property="createdAt" column="created_at"/></resultMap>
+
+    <select id="findById" resultMap="banner">
+        SELECT *
+        FROM sgtransit_main_banner
+        WHERE banner_no=#{bannerNo}
+    </select>
+
+    <insert id="insertBanner" useGeneratedKeys="true" keyProperty="bannerNo" keyColumn="banner_no">
+        INSERT INTO sgtransit_main_banner (
+            original_name,
+            stored_name,
+            file_path,
+            content_type,
+            file_size,
+            display_order,
+            created_by,
+            created_at
+        ) VALUES (
+            #{originalName},
+            #{storedName},
+            #{filePath},
+            #{contentType},
+            #{fileSize},
+            #{displayOrder},
+            #{createdBy},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <delete id="deleteById">
+        DELETE
+        FROM sgtransit_main_banner
+        WHERE banner_no=#{bannerNo}
+    </delete>
+</mapper>

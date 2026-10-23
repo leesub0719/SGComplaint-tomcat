@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>운행안내 관리 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <link rel="stylesheet" href="../../static/css/admin-routes.css" th:href="@{/css/admin-routes.css}">
+    <script src="../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+    <script src="../../static/js/admin-routes.js" th:src="@{/js/admin-routes.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar('운행안내 추가', '마을버스와 똑버스 노선 정보를 등록하고 관리합니다.')}"></header>
+        <main class="admin-content">
+            <div class="flash-message success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-message error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <section class="route-admin-summary">
+                <div><small>마을버스 노선</small><strong th:text="${routeCount}">0</strong><span>개</span><small>똑버스 이미지</small><strong th:text="${ddokBusImageCount}">0</strong><span>장</span></div>
+                <a th:href="@{/route/village-bus}" target="_blank" rel="noopener noreferrer">사용자 화면 보기 ↗</a>
+            </section>
+
+            <section class="admin-panel route-admin-panel">
+                <header class="route-admin-heading">
+                    <div><h2>새 운행안내 등록</h2><p>입력한 정보는 해당 사용자 노선 탭에 즉시 표시됩니다.</p></div>
+                </header>
+                <form class="route-admin-form" method="post" enctype="multipart/form-data"
+                      th:action="@{/admin/routes}" data-route-create-form>
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <label>운행 유형 <b>*</b>
+                        <select name="routeType" required data-route-type><option value="VILLAGE">마을버스</option><option value="DDOK">똑버스</option></select>
+                    </label>
+                    <div class="route-village-fields" data-route-village-fields>
+                        <label>버스이름 <b>*</b><input name="busName" maxlength="100" required placeholder="예: 마을버스 013"></label>
+                        <label class="wide">기점-종점 <b>*</b><input name="terminalInfo" maxlength="200" required placeholder="예: 소사역 - 역곡역"></label>
+                        <label class="wide">배차간격 <b>*</b><input name="dispatchInterval" maxlength="200" required placeholder="예: 평일 10분 / 토·일요일 15분"></label>
+                        <label>문의전화 <b>*</b><input name="inquiryPhone" maxlength="100" required placeholder="예: 032-342-3223"></label>
+                        <label>노선안내 링크 <b>*</b><input name="routeUrl" maxlength="500" required placeholder="https://..."></label>
+                    </div>
+                    <div class="route-ddok-image-field" data-route-ddok-fields hidden>
+                        <label>똑버스 안내 이미지 <b>*</b>
+                            <input name="guideImage" type="file" accept="image/jpeg,image/png,image/webp" disabled>
+                            <small>JPG, PNG, 정지 WEBP · 최대 10MB · 가로·세로 10,000px 및 2,000만 화소 이하</small>
+                        </label>
+                    </div>
+                    <button type="submit">운행안내 등록</button>
+                </form>
+            </section>
+
+            <section class="admin-panel route-list-panel">
+                <header class="route-admin-heading"><div><h2>등록된 운행안내</h2><p>등록 순서대로 사용자 화면 왼쪽 위부터 배치됩니다.</p></div></header>
+                <div class="route-admin-list">
+                    <article th:each="route : ${routes}">
+                        <div class="route-admin-row">
+                            <span class="route-type-badge" th:text="${route.routeTypeLabel}">마을버스</span>
+                            <strong th:text="${route.busName}">마을버스 013</strong>
+                            <span th:text="${route.terminalInfo}">기점 - 종점</span>
+                            <a th:href="${route.routeUrl}" target="_blank" rel="noopener noreferrer">링크 열기 ↗</a>
+                            <details><summary>수정</summary>
+                                <form class="route-edit-form" method="post" th:action="@{/admin/routes/{no}/update(no=${route.routeNo})}">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="routeType" value="VILLAGE">
+                                    <label>버스이름<input name="busName" maxlength="100" required th:value="${route.busName}"></label>
+                                    <label>기점-종점<input name="terminalInfo" maxlength="200" required th:value="${route.terminalInfo}"></label>
+                                    <label>배차간격<input name="dispatchInterval" maxlength="200" required th:value="${route.dispatchInterval}"></label>
+                                    <label>문의전화<input name="inquiryPhone" maxlength="100" required th:value="${route.inquiryPhone}"></label>
+                                    <label>노선안내 링크<input name="routeUrl" maxlength="500" required th:value="${route.routeUrl}"></label>
+                                    <button type="submit">수정 저장</button>
+                                </form>
+                            </details>
+                            <form class="route-delete-form" method="post"
+                                  th:action="@{/admin/routes/{no}/delete(no=${route.routeNo})}"
+                                  data-route-delete-form>
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit">삭제</button>
+                            </form>
+                        </div>
+                    </article>
+                    <div class="table-empty" th:if="${#lists.isEmpty(routes)}">등록된 운행안내가 없습니다.</div>
+                </div>
+            </section>
+
+            <section class="admin-panel route-list-panel">
+                <header class="route-admin-heading"><div><h2>똑버스 안내 이미지</h2><p>등록된 순서대로 사용자 똑버스 탭 중앙에 표시됩니다.</p></div></header>
+                <div class="ddok-admin-image-list">
+                    <article th:each="image : ${ddokBusImages}">
+                        <img th:src="@{${image.imageUrl}}" alt="똑버스 안내 이미지 미리보기">
+                        <div><strong th:text="${image.originalName}">ddokbus.png</strong><span><b th:text="${image.formattedSize}">1 MB</b> · <time th:text="${image.createdDateTime}">2026.09.01</time></span></div>
+                        <form method="post" data-ddok-image-delete th:action="@{/admin/routes/ddok-images/{no}/delete(no=${image.imageNo})}">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit">삭제</button>
+                        </form>
+                    </article>
+                    <div class="table-empty" th:if="${#lists.isEmpty(ddokBusImages)}">등록된 똑버스 안내 이미지가 없습니다.</div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

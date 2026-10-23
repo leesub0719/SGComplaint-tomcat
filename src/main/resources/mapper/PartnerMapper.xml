@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.mapper.PartnerMapper">
+    <resultMap id="partnerMap" type="com.transit.SGComplaint.domain.Partner">
+        <id property="partnerNo" column="partner_no"/>
+        <result property="name" column="partner_name"/>
+        <result property="phone" column="partner_phone"/>
+        <result property="site" column="partner_site"/>
+        <result property="notes" column="partner_notes"/>
+        <result property="status" column="partner_status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="activePartnerCondition">
+        WHERE partner_status = 'Y'
+        <if test="keyword != null and keyword != ''">
+            AND (
+                partner_name LIKE CONCAT(#{keyword}, '%')
+                OR partner_phone LIKE CONCAT(#{keyword}, '%')
+                OR partner_site LIKE CONCAT(#{keyword}, '%')
+            )
+        </if>
+    </sql>
+
+    <select id="countActive" resultType="long">
+        SELECT COUNT(*)
+        FROM sgtransit_partner
+        <include refid="activePartnerCondition"/>
+
+    </select>
+
+    <select id="findActivePage" resultMap="partnerMap">
+        SELECT partner_no, partner_name, partner_phone, partner_site, partner_notes, partner_status, created_at, updated_at
+        FROM sgtransit_partner
+        <include refid="activePartnerCondition"/>
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+</mapper>

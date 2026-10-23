@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공지사항 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/notice.css" th:href="@{/css/notice.css}">
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<section th:replace="~{fragments/public-layout :: subHero('/images/subpages/notices-hero.png', '공지사항')}"></section>
+<main class="notice-page">
+    <section class="notice-heading"><h1>공지사항</h1><span>(주) 서경 마을버스의 새로운 소식과 주요 안내를 확인하세요.</span></section>
+    <section class="notice-board" aria-labelledby="notice-list-title">
+        <div class="notice-toolbar">
+            <div><h2 id="notice-list-title">공지사항</h2><p>총 <strong th:text="${noticePage.totalElements}">0</strong>건</p></div>
+            <form method="get" action="/notices" th:action="@{/notices}">
+                <label class="sr-only" for="notice-keyword">공지사항 제목 검색</label>
+                <input id="notice-keyword" name="keyword" type="search" maxlength="100" th:value="${keyword}" placeholder="제목 앞부분을 검색하세요">
+                <button type="submit" aria-label="검색"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
+            </form>
+        </div>
+        <div class="notice-table-wrap">
+            <table>
+                <caption class="sr-only">공지사항 번호, 분류, 제목, 등록일, 조회수 목록</caption>
+                <thead><tr><th>번호</th><th>분류</th><th>제목</th><th>등록일</th><th>조회</th></tr></thead>
+                <tbody>
+                <tr th:each="notice : ${notices}" th:classappend="${notice.pinned} ? 'pinned-row'">
+                    <td><span class="pin-badge" th:if="${notice.pinned}">공지</span><span th:unless="${notice.pinned}" th:text="${notice.noticeNo}">1</span></td>
+                    <td><span class="category-badge" th:text="${notice.categoryLabel}">일반 안내</span></td>
+                    <td class="notice-title"><a th:href="@{/notices/{noticeNo}(noticeNo=${notice.noticeNo})}" th:text="${notice.title}">공지사항 제목</a></td>
+                    <td th:text="${notice.registeredDate}">2026.08.21</td>
+                    <td th:text="${notice.viewCount}">0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(notices)}"><td class="empty-row" colspan="5">등록된 공지사항이 없습니다.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <nav class="pagination" th:if="${noticePage.totalPages > 0}" aria-label="공지사항 페이지 이동">
+            <a th:classappend="${noticePage.first} ? 'disabled'" th:href="${noticePage.first} ? '#' : @{/notices(keyword=${keyword},page=${noticePage.number - 1})}">‹</a>
+            <a th:each="pageNo : ${#numbers.sequence(T(java.lang.Math).max(0, noticePage.number - 4), T(java.lang.Math).min(noticePage.totalPages - 1, noticePage.number + 4))}"
+               th:href="@{/notices(keyword=${keyword},page=${pageNo})}" th:text="${pageNo + 1}" th:classappend="${pageNo == noticePage.number} ? 'active'">1</a>
+            <a th:classappend="${noticePage.last} ? 'disabled'" th:href="${noticePage.last} ? '#' : @{/notices(keyword=${keyword},page=${noticePage.number + 1})}">›</a>
+        </nav>
+    </section>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

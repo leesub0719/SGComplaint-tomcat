@@ -1,0 +1,50 @@
+:root {
+    --brand: #f2b900;
+    --brand-dark: #d89f00;
+    --text: #20231f;
+    --muted: #69706b;
+    --border: #dfe3df;
+    --surface: #ffffff;
+    --error: #c73535;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--text); background: #f7f8f6; font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif; }
+button, input { font: inherit; }
+.skip-link { position: fixed; top: -60px; left: 20px; z-index: 100; padding: 10px 16px; color: #fff; background: #111; }
+.skip-link:focus { top: 12px; }
+.agreement-page { padding: 54px 20px 76px; }
+.agreement-card { width: min(920px, 100%); margin: 0 auto; padding: 44px 52px 50px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 16px 42px rgba(28, 35, 30, .08); }
+.agreement-title-area { margin-bottom: 30px; text-align: center; }
+.agreement-title-area p { margin: 0 0 8px; color: var(--brand-dark); font-size: 12px; font-weight: 900; letter-spacing: .18em; }
+.agreement-title-area h1 { margin: 0; font-size: 32px; letter-spacing: -.045em; }
+.agreement-title-area span { display: block; margin-top: 10px; color: var(--muted); font-size: 14px; }
+.all-agreement { display: flex; align-items: center; gap: 11px; padding: 18px 20px; background: #fff9df; border: 1px solid #f0cf62; border-radius: 10px; font-weight: 800; cursor: pointer; }
+.all-agreement input, .agreement-check input { width: 19px; height: 19px; accent-color: var(--brand-dark); cursor: pointer; }
+.agreement-section { margin-top: 26px; }
+.agreement-check { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; font-size: 15px; font-weight: 800; cursor: pointer; }
+.agreement-check em { color: var(--error); font-size: 13px; font-style: normal; }
+.agreement-content { height: 205px; overflow-y: auto; padding: 18px 20px; border: 1px solid var(--border); border-radius: 8px; background: #fcfdfc; font-size: 13px; line-height: 1.75; }
+.agreement-content:focus { outline: 2px solid var(--brand); outline-offset: 2px; }
+.agreement-content h2 { margin: 17px 0 5px; font-size: 14px; }
+.agreement-content h2:first-child { margin-top: 0; }
+.agreement-content p { margin: 0; }
+.privacy-content { height: 245px; }
+.agreement-error { min-height: 18px; margin: 6px 2px 0; color: var(--error); font-size: 12px; }
+.age-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid #ecefec; }
+.agreement-actions { display: flex; justify-content: center; gap: 10px; margin-top: 32px; }
+.cancel-button, .continue-button { min-width: 132px; height: 50px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; font-weight: 800; text-decoration: none; }
+.cancel-button { color: #4f5651; background: #fff; border: 1px solid #cfd5d1; }
+.continue-button { color: #fff; background: var(--brand); border: 1px solid var(--brand); cursor: pointer; }
+.continue-button:hover:not(:disabled) { background: var(--brand-dark); }
+.continue-button:disabled { color: #8b8f8c; background: #e8ebe8; border-color: #e0e3e0; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+    .agreement-page { padding: 30px 14px 52px; }
+    .agreement-card { padding: 30px 20px 36px; border-radius: 14px; }
+    .agreement-title-area h1 { font-size: 27px; }
+    .all-agreement { align-items: flex-start; padding: 15px; font-size: 14px; }
+    .agreement-content { padding: 15px; }
+    .agreement-actions { flex-direction: column-reverse; }
+    .cancel-button, .continue-button { width: 100%; }
+}
