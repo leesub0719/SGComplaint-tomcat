@@ -50,6 +50,23 @@ Context Path가 되므로 `sgcomplaint.war`는 `/sgcomplaint`로 서비스됩니
 Tomcat 10 이하에는 배포하지 않습니다. 이 프로젝트는 Spring Boot 4/Jakarta Servlet API를
 사용하므로 Tomcat 11을 기준으로 검증합니다.
 
+## Eclipse 개발 서버 실행
+
+이 프로젝트는 Gradle의 `eclipse-wtp` 설정으로 Eclipse Dynamic Web Module을 생성합니다.
+기존에 일반 Gradle 프로젝트로 가져왔다면 Eclipse 작업공간에서 프로젝트만 제거하되
+디스크의 소스는 삭제하지 말고, `File > Import > Gradle > Existing Gradle Project`로 다시
+가져옵니다. 이후 아래 항목을 확인합니다.
+
+1. `Project Facets`: Java 17, Dynamic Web Module 6.1
+2. `Targeted Runtimes`: Apache Tomcat 11
+3. `Web Project Settings`: Context Root `sgcomplaint`
+4. Tomcat Launch Configuration 환경변수:
+   `SPRING_PROFILES_ACTIVE=local,tomcat`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`
+
+`Servers > Add and Remove`에서 `SGComplaint-tomcat`을 추가한 뒤 실행하면 개발 주소는
+`http://localhost:8080/sgcomplaint/`입니다. Tomcat 10 이하나 Dynamic Web Module 6.0
+이하를 선택하지 않습니다.
+
 ## 빌드와 로컬 검증
 
 PowerShell:
