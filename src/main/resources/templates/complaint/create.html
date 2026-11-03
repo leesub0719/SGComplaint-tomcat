@@ -127,7 +127,8 @@
             <p id="form-message" class="form-message" tabindex="-1" aria-live="polite"></p>
 
             <div class="form-actions">
-                <a class="button button-cancel" href="/" th:href="@{/}">취소</a>
+                <a class="button button-cancel" href="/" th:href="@{/}" onclick="history.back(); return false;">취소</a>
+               <!--  <a class="button button-cancel" href="/" th:onclick="|location.href='@{/}'|">취소</a> -->
                 <button id="complaint-submit" class="button button-submit" type="submit">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
                     <span id="complaint-submit-text">접수하기</span>
