@@ -90,3 +90,95 @@ body.modal-open{overflow:hidden}
 .partner-popover dd{font-size:12px}
 @media(max-width:1100px){.member-summary-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.member-summary-grid{grid-template-columns:1fr}}
+
+/* 관리자 화면 가독성: 기존의 작은 본문/설명/게시판 글자를 약 3px 확대한다. */
+.admin-brand small{font-size:13px}
+.admin-nav p{font-size:12px}
+.admin-nav a{font-size:16px}
+.sidebar-bottom a,.sidebar-bottom button{font-size:15px}
+.admin-topbar p{font-size:14px}
+.admin-profile strong{font-size:15px}
+.admin-profile small{font-size:12px}
+.stat-card p{font-size:14px}
+.stat-card small{font-size:12px}
+.panel-heading span{font-size:12px}
+.panel-heading a{font-size:14px}
+.panel-heading em{font-size:13px}
+.admin-table{font-size:14px}
+.admin-table th{padding:13px 12px}
+.admin-table td{padding:16px 12px}
+.quick-panel>a{font-size:15px}
+.quick-panel b{font-size:12px}
+.admin-status{min-width:68px;height:29px;font-size:13px}
+.filter-tabs a{font-size:15px}
+.management-toolbar p{font-size:14px}
+.flash-message{font-size:15px}
+.admin-summary-main small{font-size:12px}
+.admin-summary-main strong{font-size:17px}
+.admin-summary-main em,.admin-complaint-summary time{font-size:13px}
+.complaint-information dt{font-size:12px}
+.complaint-information dd{font-size:14px}
+.admin-content-box h3,.answer-heading h3{font-size:16px}
+.admin-content-box p,.admin-content-box>div,.modal-content-section>div{font-size:14px}
+.answer-heading p,.answer-heading label,.answer-actions span{font-size:12px}
+.answer-heading select,.answer-form textarea,.answer-actions button{font-size:14px}
+.admin-empty,.development-banner{font-size:15px}
+.notice-form label{font-size:14px}
+.notice-form input,.notice-form select,.notice-form textarea{font-size:14px}
+.form-bottom span{font-size:13px}
+.form-bottom button,.member-search button{font-size:14px}
+.member-summary-grid span,.banner-summary-grid span{font-size:13px}
+.member-summary-grid small,.banner-summary-grid small{font-size:12px}
+.member-search input,.member-search select{font-size:14px}
+.admin-pagination a,.admin-pagination>span{font-size:14px}
+.modal-information dt{font-size:13px}
+.modal-information dd{font-size:15px}
+.modal-content-section h3{font-size:16px}
+.modal-content-section>p:not(.no-attachment){font-size:15px}
+.attachment-links a{font-size:14px}
+.no-attachment,.complaint-modal-footer button{font-size:14px}
+.answer-existing-files h4,.answer-file-input>label{font-size:14px}
+.answer-file-input input,.answer-file-input>button{font-size:13px}
+.member-table td>strong,.member-id-button{font-size:14px}
+.current-account-label{font-size:11px}
+.member-role-badge,.member-status-badge{font-size:12px}
+.member-role-form select{font-size:13px}
+.member-role-form button,.self-role-lock{font-size:12px}
+.member-role-notice{font-size:13px}
+.member-profile-summary p{font-size:13px}
+.member-detail-grid dt{font-size:12px}
+.member-detail-grid dd{font-size:14px}
+.password-security-notice{font-size:12px}
+.notice-pin-control,.notice-editor-label{font-size:14px}
+.notice-editor-label span{font-size:12px}
+.notice-editor-toolbar select,.notice-editor-toolbar button{font-size:13px}
+.notice-editor{font-size:15px}
+.notice-editor-message{font-size:12px}
+.notice-edit-button,.notice-delete-button{height:34px;font-size:13px}
+.notice-popup-toggle span,.notice-list-heading p{font-size:13px}
+.panel-heading .admin-primary-button{font-size:14px}
+.notice-category-badge,.notice-setting-on,.notice-setting-off{font-size:12px}
+.partner-summary small{font-size:13px}
+.partner-summary p{font-size:12px}
+.partner-create-button{font-size:14px}
+.partner-list-heading p{font-size:13px}
+.partner-search input{font-size:14px}
+.partner-search button,.partner-search a{font-size:13px}
+.partner-table th,.partner-table td,.partner-name-button{font-size:15px}
+.partner-row-actions>button,.partner-row-actions form button{height:34px;font-size:13px}
+.partner-popover header span,.partner-popover dt{font-size:11px}
+.partner-popover dd{font-size:15px}
+.partner-card-fields label{font-size:13px}
+.partner-card-fields input,.partner-card-fields textarea{font-size:14px}
+.partner-form-actions button{font-size:13px}
+.main-banner-upload>label>strong{font-size:15px}
+.main-banner-upload>label>small{font-size:12px}
+.main-banner-upload input{font-size:13px}
+.main-banner-upload>p{font-size:12px}
+.main-banner-upload>button{font-size:14px}
+.banner-order{font-size:13px}
+.banner-information>strong{font-size:15px}
+.banner-information p,.banner-information small{font-size:12px}
+.main-banner-card form button{font-size:12px}
+.main-banner-empty>strong{font-size:16px}
+.main-banner-empty>p{font-size:13px}

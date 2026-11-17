@@ -9,12 +9,14 @@ import com.transit.SGComplaint.domain.ComplaintAnswerAttachment;
 import com.transit.SGComplaint.domain.ComplaintAttachment;
 import com.transit.SGComplaint.domain.ComplaintStatus;
 import com.transit.SGComplaint.domain.Employee;
+import com.transit.SGComplaint.event.ComplaintAnsweredEvent;
 import com.transit.SGComplaint.repository.ComplaintAnswerAttachmentRepository;
 import com.transit.SGComplaint.repository.ComplaintAnswerRepository;
 import com.transit.SGComplaint.repository.ComplaintAttachmentRepository;
 import com.transit.SGComplaint.repository.ComplaintRepository;
 import com.transit.SGComplaint.mapper.EmployeeMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -57,6 +60,7 @@ public class AdminComplaintService {
     private final ComplaintAnswerAttachmentRepository answerAttachmentRepository;
     private final EmployeeMapper employeeRepository;
     private final RichTextSanitizer richTextSanitizer;
+    private final ApplicationEventPublisher eventPublisher;
     private final Path complaintStorageRoot;
     private final Path answerStorageRoot;
 
@@ -67,6 +71,7 @@ public class AdminComplaintService {
             ComplaintAnswerAttachmentRepository answerAttachmentRepository,
             EmployeeMapper employeeRepository,
             RichTextSanitizer richTextSanitizer,
+            ApplicationEventPublisher eventPublisher,
             @Value("${app.upload.complaint-dir}") String complaintStorageDirectory,
             @Value("${app.upload.answer-dir}") String answerStorageDirectory) {
         this.complaintRepository = complaintRepository;
@@ -75,6 +80,7 @@ public class AdminComplaintService {
         this.answerAttachmentRepository = answerAttachmentRepository;
         this.employeeRepository = employeeRepository;
         this.richTextSanitizer = richTextSanitizer;
+        this.eventPublisher = eventPublisher;
         this.complaintStorageRoot = Path.of(complaintStorageDirectory).toAbsolutePath().normalize();
         this.answerStorageRoot = Path.of(answerStorageDirectory).toAbsolutePath().normalize();
     }
@@ -119,6 +125,9 @@ public class AdminComplaintService {
                 .orElseThrow(() -> new ComplaintException("관리자 계정 정보를 확인할 수 없습니다."));
         Complaint complaint = complaintRepository.findById(complaintNo)
                 .orElseThrow(() -> new ComplaintException("민원 정보를 찾을 수 없습니다."));
+        Optional<ComplaintAnswer> existingAnswer =
+                answerRepository.findByComplaintNo(complaintNo);
+        boolean notifyFirstAnswer = existingAnswer.isEmpty();
 
         String resolvedAnswerContent = StringUtils.hasText(answerContent)
                 ? answerContent.trim()
@@ -138,10 +147,10 @@ public class AdminComplaintService {
                     "다른 관리자가 먼저 이 민원을 수정했습니다. 목록을 새로고침한 뒤 다시 확인해 주세요.");
         }
 
-        ComplaintAnswer answer = answerRepository.findByComplaintNo(complaintNo)
-                .map(existingAnswer -> {
-                    existingAnswer.update(administrator, resolvedAnswerContent);
-                    return existingAnswer;
+        ComplaintAnswer answer = existingAnswer
+                .map(savedAnswer -> {
+                    savedAnswer.update(administrator, resolvedAnswerContent);
+                    return savedAnswer;
                 })
                 .orElseGet(() -> ComplaintAnswer.create(
                         complaintNo,
@@ -154,6 +163,11 @@ public class AdminComplaintService {
         validateAnswerFiles(uploadFiles, existingFileCount);
         if (!uploadFiles.isEmpty()) {
             saveAnswerAttachments(answer.getAnswerNo(), uploadFiles);
+        }
+
+        if (notifyFirstAnswer) {
+            eventPublisher.publishEvent(new ComplaintAnsweredEvent(
+                    complaintNo, complaint.getEmpPhone()));
         }
 
     }
@@ -242,6 +256,7 @@ public class AdminComplaintService {
             case "PRAISE" -> "칭찬합니다";
             case "COMPLAINT", "DRIVER", "BUS" -> "불편합니다";
             case "LOST", "GENERAL" -> "분실물 문의";
+            case "ETC" -> "기타";
             default -> "기타";
         };
 

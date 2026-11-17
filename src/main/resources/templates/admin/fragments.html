@@ -29,6 +29,9 @@
         <a href="/admin/partners" th:if="${isMaster}" th:href="@{/admin/partners}" th:classappend="${activeMenu == 'partners'} ? 'active'">
             <span aria-hidden="true">♧</span> 협력업체
         </a>
+        <a href="/admin/recruitments" th:href="@{/admin/recruitments}" th:classappend="${activeMenu == 'recruitments'} ? 'active'">
+            <span aria-hidden="true">▣</span> 채용관리
+        </a>
     </nav>
     <div class="sidebar-bottom">
         <a href="/" th:href="@{/}">사용자 메인으로</a>

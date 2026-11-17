@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지원 현황 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <link rel="stylesheet" href="../../../static/css/admin-recruit.css" th:href="@{/css/admin-recruit.css}">
+    <script src="../../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar('지원 현황', '지원자 이름을 선택해 입력 정보와 제출서류를 확인합니다.')}"></header>
+        <main class="admin-content">
+            <section class="admin-panel recruit-applications-panel">
+                <div class="panel-heading application-heading">
+                    <div>
+                        <p>채용공고</p>
+                        <h2 th:text="${posting.title}">채용공고 제목</h2>
+                        <span>마감일 <b th:text="${posting.deadline}">2026-12-31</b></span>
+                    </div>
+                    <a th:href="@{/admin/recruitments}">공고 목록</a>
+                </div>
+
+                <div class="application-summary">
+                    총 <strong th:text="${#lists.size(applications)}">0</strong>명의 지원자가 접수했습니다.
+                    <span>지원자 이름을 클릭하면 상세정보를 확인할 수 있습니다.</span>
+                </div>
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table recruitment-application-table">
+                        <caption class="sr-only">지원번호, 지원자 이름, 지원구분, 연락처, 이메일, 제출파일, 지원일 목록</caption>
+                        <thead>
+                        <tr>
+                            <th>지원번호</th>
+                            <th>지원자 이름</th>
+                            <th>지원구분</th>
+                            <th>연락처</th>
+                            <th>이메일</th>
+                            <th>제출파일</th>
+                            <th>지원일</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="applicant : ${applications}">
+                            <td th:text="${applicant.applicationNo}">1</td>
+                            <td>
+                                <button class="member-id-button application-name-button" type="button"
+                                        th:attr="data-member-modal-open=${'application-modal-' + applicant.applicationNo}"
+                                        th:text="${applicant.applicantName}">지원자</button>
+                            </td>
+                            <td><span class="application-type-badge" th:text="${applicant.applicantTypeLabel}">경력</span></td>
+                            <td th:text="${applicant.phone}">010-0000-0000</td>
+                            <td th:text="${#strings.isEmpty(applicant.email) ? '-' : applicant.email}">email@example.com</td>
+                            <td><b class="application-file-count" th:text="|${applicant.fileCount}개|">1개</b></td>
+                            <td th:text="${applicant.appliedDateTime}">2026.11.10 10:00</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(applications)}">
+                            <td class="table-empty" colspan="7">아직 접수된 지원서가 없습니다.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<th:block th:each="applicant : ${applications}">
+    <div class="member-modal recruitment-application-modal"
+         th:id="${'application-modal-' + applicant.applicationNo}" hidden>
+        <div class="member-modal-backdrop" data-member-modal-close></div>
+        <section class="member-modal-dialog recruitment-application-dialog" role="dialog" aria-modal="true"
+                 th:attr="aria-labelledby=${'application-modal-title-' + applicant.applicationNo}">
+            <header class="member-modal-header">
+                <div><h2 th:id="${'application-modal-title-' + applicant.applicationNo}">지원자 상세정보</h2></div>
+                <button type="button" data-member-modal-close aria-label="지원자 상세 팝업 닫기">×</button>
+            </header>
+            <div class="member-modal-body">
+                <div class="member-profile-summary application-profile-summary">
+                    <span th:text="${#strings.substring(applicant.applicantName, 0, 1)}">지</span>
+                    <div>
+                        <strong th:text="${applicant.applicantName}">지원자</strong>
+                        <p>지원번호 <b th:text="${applicant.applicationNo}">1</b></p>
+                    </div>
+                    <span class="application-type-badge" th:text="${applicant.applicantTypeLabel}">경력</span>
+                </div>
+
+                <dl class="member-detail-grid application-detail-grid">
+                    <div><dt>지원자 이름</dt><dd th:text="${applicant.applicantName}">지원자</dd></div>
+                    <div><dt>지원구분</dt><dd th:text="${applicant.applicantTypeLabel}">경력</dd></div>
+                    <div><dt>연락처</dt><dd th:text="${applicant.phone}">010-0000-0000</dd></div>
+                    <div><dt>이메일</dt><dd th:text="${#strings.isEmpty(applicant.email) ? '-' : applicant.email}">email@example.com</dd></div>
+                    <div class="wide"><dt>지원 공고</dt><dd th:text="${posting.title}">채용공고 제목</dd></div>
+                    <div class="wide"><dt>지원 메모</dt><dd class="application-memo-text" th:text="${#strings.isEmpty(applicant.memo) ? '등록된 지원 메모가 없습니다.' : applicant.memo}">지원 메모</dd></div>
+                    <div><dt>제출파일</dt><dd th:text="|${applicant.fileCount}개|">1개</dd></div>
+                    <div><dt>지원일시</dt><dd th:text="${applicant.appliedDateTime}">2026.11.10 10:00</dd></div>
+                </dl>
+                <p class="application-download-notice">ZIP 파일에는 지원자가 제출한 모든 파일이 서류별 이름으로 정리되어 포함됩니다.</p>
+            </div>
+            <footer class="member-modal-footer recruitment-modal-footer">
+                <button type="button" data-member-modal-close>닫기</button>
+                <a class="application-zip-download" th:if="${applicant.fileCount > 0}"
+                   th:href="@{/admin/recruitments/applications/{no}/files.zip(no=${applicant.applicationNo})}">
+                    전체 지원파일 ZIP 다운로드
+                </a>
+                <span class="application-no-files" th:unless="${applicant.fileCount > 0}">다운로드할 제출파일이 없습니다.</span>
+            </footer>
+        </section>
+    </div>
+</th:block>
+
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>온라인 지원 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../../../static/css/recruit.css"
+          th:href="@{/css/recruit.css(v='20261110d')}">
+    <link rel="stylesheet" href="../../../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <script src="../../../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+    <script src="../../../../static/js/recruit-apply.js" th:src="@{/js/recruit-apply.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<main class="recruit-page apply-page">
+    <form class="application-form" method="post" enctype="multipart/form-data"
+          th:action="@{/recruit/notices/{no}/apply(no=${posting.postingNo})}" th:object="${applicationRequest}">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <header class="application-form-header">
+            <span aria-hidden="true">✓</span><div><h1>온라인 지원하기</h1><p>연락처와 지원서류를 한 번에 제출할 수 있습니다. 제출한 정보와 파일은 채용 담당자만 확인합니다.</p></div>
+            <a th:href="@{/recruit/notices/{no}(no=${posting.postingNo})}">지원서 접기</a>
+        </header>
+        <div class="form-errors" th:if="${#fields.hasAnyErrors()}"><p th:each="error : ${#fields.allErrors()}" th:text="${error}">입력값을 확인해 주세요.</p></div>
+        <div class="application-grid">
+            <label><span>지원 공고 <b>*</b></span><input type="text" readonly th:value="${posting.title}"></label>
+            <label><span>성명 <b>*</b></span><input type="text" th:field="*{applicantName}" maxlength="50" required placeholder="지원자 성명"></label>
+            <label><span>연락처 <b>*</b></span><input type="tel" th:field="*{phone}" maxlength="30" required placeholder="010-0000-0000"></label>
+            <label><span>이메일</span><input type="email" th:field="*{email}" maxlength="100" placeholder="선택 입력"></label>
+        </div>
+        <fieldset class="applicant-type"><legend>지원 구분 <b>*</b></legend>
+            <label><input type="radio" th:field="*{applicantType}" value="NEW"><span><strong>신입·자격 1년 미만</strong><small>양성교육 수료증을 함께 제출합니다.</small></span></label>
+            <label><input type="radio" th:field="*{applicantType}" value="EXPERIENCED"><span><strong>경력 1년 이상</strong><small>전 직장 경력증명서를 함께 제출합니다.</small></span></label>
+        </fieldset>
+        <label class="application-memo">지원 메모<textarea th:field="*{memo}" maxlength="2000" rows="5" placeholder="근무 가능일, 경력 등 전달할 내용을 입력해 주세요."></textarea></label>
+
+        <section class="document-section">
+            <h2>제출서류</h2><p>PDF, 이미지, 한글(HWP·HWPX), Word, Excel, CSV 형식으로 각 10MB 이하, 전체 40MB 이하로 첨부해 주세요.</p>
+            <div class="document-list" data-application-files>
+                <label th:if="${#lists.contains(posting.documentTypes, 'RESUME')}"><span><b><span class="document-sequence" aria-hidden="true"></span> 이력서 <em>필수</em></b><small>사진이 포함된 이력서를 첨부해 주세요.</small></span><input type="file" th:field="*{resume}" required accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.hwp,.hwpx,.xls,.xlsx,.csv"><i>선택된 파일 없음</i></label>
+                <label th:if="${#lists.contains(posting.documentTypes, 'DRIVER_LICENSE')}"><span><b><span class="document-sequence" aria-hidden="true"></span> 운전면허증 사본</b></span><input type="file" th:field="*{driverLicense}" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.hwp,.hwpx,.xls,.xlsx,.csv"><i>선택된 파일 없음</i></label>
+                <label th:if="${#lists.contains(posting.documentTypes, 'BUS_DRIVER_LICENSE')}"><span><b><span class="document-sequence" aria-hidden="true"></span> 버스운전자격증 사본</b></span><input type="file" th:field="*{busDriverLicense}" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.hwp,.hwpx,.xls,.xlsx,.csv"><i>선택된 파일 없음</i></label>
+                <label th:if="${#lists.contains(posting.documentTypes, 'APTITUDE_RESULT')}"><span><b><span class="document-sequence" aria-hidden="true"></span> 운전정밀검사 판정표</b><small>최근 1년 이내 발급본</small></span><input type="file" th:field="*{aptitudeResult}" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.hwp,.hwpx,.xls,.xlsx,.csv"><i>선택된 파일 없음</i></label>
+                <label th:if="${#lists.contains(posting.documentTypes, 'TRAINING_CERTIFICATE')}"><span><b><span class="document-sequence" aria-hidden="true"></span> 운수종사자 교육 확인서</b></span><input type="file" th:field="*{trainingCertificate}" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.hwp,.hwpx,.xls,.xlsx,.csv"><i>선택된 파일 없음</i></label>
+                <label th:if="${#lists.contains(posting.documentTypes, 'DRIVING_CAREER')}"><span><b><span class="document-sequence" aria-hidden="true"></span> 운전경력 증명서</b><small>경찰청·정부24 발급 가능</small></span><input type="file" th:field="*{drivingCareer}" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.hwp,.hwpx,.xls,.xlsx,.csv"><i>선택된 파일 없음</i></label>
+                <div class="post-hire-document" th:if="${#lists.contains(posting.documentTypes, 'RESIDENT_REGISTRATION')}"><span><b><span class="document-sequence" aria-hidden="true"></span> 주민등록등본</b><small>불필요한 개인정보 수집을 막기 위해 채용 확정 후 별도로 요청합니다.</small></span><em>채용 후 제출</em></div>
+                <div class="post-hire-document" th:if="${#lists.contains(posting.documentTypes, 'MEDICAL_CERTIFICATE')}"><span><b><span class="document-sequence" aria-hidden="true"></span> 채용신체검사서</b><small>채용 확정 후 별도로 요청합니다.</small></span><em>채용 후 제출</em></div>
+                <label th:if="${#lists.contains(posting.documentTypes, 'CAREER_CERTIFICATE')}"><span><b><span class="document-sequence" aria-hidden="true"></span> 경력증명서</b><small>경력 지원자 선택 제출</small></span><input type="file" th:field="*{careerCertificate}" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.hwp,.hwpx,.xls,.xlsx,.csv"><i>선택된 파일 없음</i></label>
+            </div>
+            <p class="file-total" data-file-total>선택된 파일 0개 · 0MB</p>
+        </section>
+        <section class="privacy-notice"><h2>개인정보 수집·이용 안내</h2><p>수집항목: 성명, 연락처, 이메일, 경력정보 및 제출서류 · 이용목적: 입사지원 확인과 채용 심사 · 보유기간: 채용 절차 종료 후 관련 법령과 내부 파기 정책에 따름</p><label><input type="checkbox" th:field="*{consented}" required> 개인정보 및 채용서류 수집·이용에 동의합니다.</label></section>
+        <footer class="application-actions"><span>채용 문의는 회사 대표 연락처를 이용해 주세요.</span><button type="submit">지원서 제출하기</button></footer>
+    </form>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

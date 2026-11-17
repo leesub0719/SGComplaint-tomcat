@@ -1,0 +1,76 @@
+.recruit-admin-panel,.recruit-applications-panel{min-height:560px;padding:26px}.recruit-admin-heading{align-items:flex-end}.recruit-admin-heading p,.application-heading p{margin:7px 0 0;color:var(--muted);font-size:10px}.recruit-admin-search{display:grid;grid-template-columns:minmax(240px,1fr) 76px 64px;gap:8px;margin:20px 0 18px}.recruit-admin-search input{height:42px;padding:0 13px;border:1px solid #cad7d2;border-radius:8px;outline:0;font-size:11px}.recruit-admin-search input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(8,116,95,.08)}.recruit-admin-search button,.recruit-admin-search a{height:42px;display:grid;place-items:center;border-radius:8px;font-size:10px;font-weight:800}.recruit-admin-search button{color:#fff;background:var(--green);border:0}.recruit-admin-search a{color:#65726d;background:#fff;border:1px solid #cad6d1}.recruit-admin-table th:first-child{width:65px}.recruit-admin-table th:nth-child(3){width:110px}.recruit-admin-table th:nth-child(4){width:95px}.recruit-admin-table th:nth-child(5){width:100px}.recruit-admin-table th:last-child{width:110px}.recruit-admin-title{font-weight:800}.recruit-admin-title:hover{color:var(--green);text-decoration:underline}.recruit-admin-status{display:inline-flex;padding:5px 10px;border-radius:13px;font-size:9px;font-weight:850}.recruit-admin-status.open{color:#126550;background:#e1f4ee}.recruit-admin-status.closed{color:#777f7c;background:#edf1ef}.application-count{color:var(--green);font-size:10px;font-weight:800;text-decoration:underline;text-underline-offset:3px}.status-button{height:30px;padding:0 9px;color:#56635e;background:#fff;border:1px solid #c8d4d0;border-radius:6px;font-size:9px;font-weight:800;cursor:pointer}.recruitment-form-panel{padding:27px}.form-errors{margin-bottom:18px;padding:12px;color:#a53c3c;background:#fff0f0;border:1px solid #efc9c9;border-radius:8px}.form-errors p{margin:3px 0;font-size:11px}.recruitment-posting-form{display:grid;grid-template-columns:1fr 1fr;gap:17px}.recruitment-posting-form label{display:grid;gap:7px;color:#53605b;font-size:11px;font-weight:800}.recruitment-posting-form label.full{grid-column:1/-1}.recruitment-posting-form b{color:var(--red)}.recruitment-posting-form input[type=text],.recruitment-posting-form input[type=date],.recruitment-posting-form textarea{width:100%;padding:0 13px;border:1px solid #c8d5d0;border-radius:8px;outline:0;font-size:11px}.recruitment-posting-form input{height:44px}.recruitment-posting-form textarea{min-height:360px;padding:14px;line-height:1.75;resize:vertical}.recruitment-posting-form input:focus,.recruitment-posting-form textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(8,116,95,.08)}.recruitment-posting-form .active-check{display:flex;align-items:center;gap:9px;padding:0 15px;background:#f6f9f8;border:1px solid #d4dfdb;border-radius:8px}.active-check input{width:16px;height:16px;accent-color:var(--green)}.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:21px;padding-top:18px;border-top:1px solid var(--line)}.form-actions a,.form-actions button{height:42px;display:inline-flex;align-items:center;justify-content:center;padding:0 18px;border-radius:8px;font-size:10px;font-weight:850}.form-actions a{color:#5d6965;background:#fff;border:1px solid #cbd6d2}.form-actions button{color:#fff;background:var(--green);border:1px solid var(--green)}.application-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}.application-heading h2{margin-top:4px}.application-heading span{display:block;margin-top:7px;color:var(--muted);font-size:10px}.application-heading>a{height:37px;display:grid;place-items:center;padding:0 14px;color:var(--green);background:#fff;border:1px solid #b9d1ca;border-radius:7px;font-size:10px;font-weight:800}.application-summary{margin:20px 0;padding:15px;color:#41504b;background:#edf7f4;border-radius:9px;font-size:11px}.application-summary strong{color:var(--green);font-size:17px}.application-card-list{display:grid;gap:12px}.application-card{overflow:hidden;border:1px solid var(--line);border-radius:11px}.application-card>header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:15px 17px;background:#f8faf9}.application-card>header span{padding:5px 9px;color:var(--green-dark);background:var(--green-pale);border-radius:12px;font-size:9px;font-weight:800}.application-card h3{margin:0;font-size:14px}.application-card time{color:#7b8783;font-size:9px}.application-card dl{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:0;padding:17px}.application-card dl>div.wide{grid-column:1/-1}.application-card dt{margin-bottom:5px;color:#86908d;font-size:9px}.application-card dd{margin:0;font-size:11px;line-height:1.65;white-space:pre-wrap}.application-card>footer{display:flex;align-items:center;justify-content:flex-end;gap:13px;padding:12px 17px;background:#f8faf9;border-top:1px solid var(--line)}.application-card>footer span,.application-card>footer em{color:#75817d;font-size:9px;font-style:normal}.application-card>footer a{height:32px;display:inline-flex;align-items:center;padding:0 11px;color:#fff;background:var(--green);border-radius:6px;font-size:9px;font-weight:800}.application-empty{padding:80px 20px;color:#87918e;text-align:center;background:#f8faf9;border-radius:10px}
+@media(max-width:700px){.recruit-admin-panel,.recruit-applications-panel,.recruitment-form-panel{padding:18px 14px}.recruit-admin-heading,.application-heading{align-items:stretch;flex-direction:column}.recruit-admin-heading .admin-primary-button{justify-content:center}.recruit-admin-search{grid-template-columns:1fr 1fr}.recruit-admin-search input{grid-column:1/-1}.recruit-admin-table{min-width:760px}.recruitment-posting-form{grid-template-columns:1fr}.recruitment-posting-form label.full{grid-column:auto}.application-card>header{grid-template-columns:auto 1fr}.application-card time{grid-column:1/-1}.application-card dl{grid-template-columns:1fr}.application-card dl>div.wide{grid-column:auto}}
+
+/* admin.css의 확대 기준을 채용관리 전용 구성요소에도 동일하게 적용한다. */
+.recruit-admin-heading p,.application-heading p{font-size:13px}
+.recruit-admin-search input{font-size:14px}
+.recruit-admin-search button,.recruit-admin-search a{font-size:13px}
+.recruit-admin-status{font-size:12px}
+.application-count{font-size:13px}
+.status-button{height:34px;font-size:12px}
+.form-errors p{font-size:14px}
+.recruitment-posting-form label{font-size:14px}
+.recruitment-posting-form input[type=text],.recruitment-posting-form input[type=date],.recruitment-posting-form textarea{font-size:14px}
+.form-actions a,.form-actions button{font-size:13px}
+.application-heading span,.application-heading>a{font-size:13px}
+.application-summary{font-size:14px}
+.application-card>header span{font-size:12px}
+.application-card h3{font-size:17px}
+.application-card time,.application-card dt{font-size:12px}
+.application-card dd{font-size:14px}
+.application-card>footer span,.application-card>footer em,.application-card>footer a{font-size:12px}
+
+/* 지원현황 게시판과 지원자 상세 팝업 */
+.application-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.application-summary>span{margin-left:auto;color:#6f7d78;font-size:13px}
+.recruitment-application-table{min-width:980px}
+.recruitment-application-table th:first-child{width:90px}
+.recruitment-application-table th:nth-child(2){width:150px}
+.recruitment-application-table th:nth-child(3){width:145px}
+.recruitment-application-table th:nth-child(4){width:165px}
+.recruitment-application-table th:nth-child(6){width:100px}
+.recruitment-application-table th:last-child{width:160px}
+.application-name-button{font-size:14px}
+.application-type-badge{display:inline-flex;align-items:center;justify-content:center;min-width:88px;padding:6px 11px;color:var(--green-dark);background:var(--green-pale);border-radius:14px;font-size:12px;font-weight:850}
+.application-file-count{color:var(--green);font-size:14px}
+.recruitment-application-dialog{width:min(760px,100%)}
+.application-profile-summary>.application-type-badge{width:auto;height:auto;color:var(--green-dark);background:#fff;border-radius:14px}
+.application-detail-grid dd{white-space:normal}
+.application-memo-text{min-height:64px;padding:12px;background:#f5f8f7;border-radius:8px;white-space:pre-wrap!important}
+.application-download-notice{margin:16px 0 0;padding:12px 14px;color:#65736e;background:#f5f8f7;border-radius:8px;font-size:13px;line-height:1.6}
+.recruitment-modal-footer{align-items:center;gap:8px}
+.recruitment-modal-footer>button{color:#5f6c67;background:#fff;border:1px solid #cad5d1}
+.application-zip-download{height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;color:#fff;background:var(--green);border-radius:7px;font-size:13px;font-weight:850}
+.application-zip-download:hover{background:var(--green-dark)}
+.application-no-files{padding:0 5px;color:#7d8884;font-size:13px}
+@media(max-width:700px){.application-summary>span{width:100%;margin-left:0}.recruitment-modal-footer{align-items:stretch;flex-direction:column}.recruitment-modal-footer>button,.application-zip-download{width:100%}}
+
+/* 채용공고 관리 작업 */
+.recruit-admin-table th:last-child{width:250px}
+.recruitment-row-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.recruitment-row-actions form{margin:0}
+.recruitment-edit-button,.recruitment-delete-button{height:34px;display:inline-flex;align-items:center;justify-content:center;padding:0 10px;border-radius:6px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.recruitment-edit-button{color:var(--green-dark);background:var(--green-pale);border:1px solid #c9e4dc}
+.recruitment-edit-button:hover{color:#fff;background:var(--green)}
+.recruitment-delete-button{color:#a33b3b;background:#fff0f0;border:1px solid #efcccc}
+.recruitment-delete-button:hover:not(:disabled){color:#fff;background:var(--red)}
+.recruitment-delete-button:disabled{color:#8a9490;background:#f1f3f2;border-color:#d8dddb;cursor:not-allowed}
+
+/* 공고별 지원 첨부서류 선택 */
+.posting-toggle-stack{display:grid;gap:9px}
+.posting-toggle-stack .active-check{min-height:44px}
+.deadline-input-wrap{position:relative;display:block;overflow:hidden;border-radius:8px}
+.deadline-input-wrap .deadline-lock{display:none;position:absolute;inset:0;z-index:2;place-items:center;color:#64716c;background:rgba(230,235,233,.82);border:1px solid #c8d5d0;border-radius:8px;backdrop-filter:blur(3px);font-size:13px;font-weight:800;cursor:not-allowed}
+.deadline-input-wrap.is-disabled .deadline-lock{display:grid}
+.deadline-field.is-disabled{color:#89938f}
+.deadline-input-wrap.is-disabled input[type=date],.recruitment-posting-form input[type=date]:disabled{color:transparent!important;background:#dfe5e2!important;filter:blur(3px);opacity:.45;cursor:not-allowed;pointer-events:none;user-select:none}
+.posting-document-options{margin:4px 0 0;padding:18px;border:1px solid #d7e1dd;border-radius:10px}
+.posting-document-options legend{padding:0 7px;color:var(--green-dark);font-size:14px;font-weight:850}
+.posting-document-options>p{margin:0 0 14px;color:var(--muted);font-size:13px;font-weight:500}
+.posting-document-options>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.recruitment-posting-form .posting-document-option{min-height:58px;display:flex;align-items:center;gap:10px;padding:11px 13px;background:#f7faf9;border:1px solid #dce6e2;border-radius:8px;cursor:pointer}
+.posting-document-option input{width:18px;height:18px;flex:0 0 auto;accent-color:var(--green)}
+.posting-document-option span{display:grid;gap:3px}
+.posting-document-option strong{font-size:14px}
+.posting-document-option small{color:var(--muted);font-size:12px;font-weight:500}
+@media(max-width:700px){.posting-document-options>div{grid-template-columns:1fr}}

@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var editor = document.querySelector('#complaint-editor');
     var editorShell = document.querySelector('.editor-shell');
     var postPassword = document.querySelector('#post-password');
-    var editorFont = document.querySelector('#editor-font');
-    var editorSize = document.querySelector('#editor-size');
     var files = document.querySelector('#complaint-files');
     var titleCount = document.querySelector('#title-count');
     var contentCount = document.querySelector('#content-count');
@@ -24,7 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var complaintNumber = document.querySelector('#complaint-number');
     var completeConfirm = document.querySelector('#complete-confirm');
     var selectedFiles = [];
-    var savedEditorRange = null;
+    var MAX_FILE_COUNT = 5;
+    var MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     function updateCount(input, counter) {
         counter.textContent = String(input.value.length);
@@ -41,29 +40,6 @@ document.addEventListener('DOMContentLoaded', function () {
         editorShell.classList.remove('invalid');
     }
 
-    function rememberEditorSelection() {
-        var selection = window.getSelection();
-        if (!selection.rangeCount || !editor.contains(selection.anchorNode)) return;
-        savedEditorRange = selection.getRangeAt(0).cloneRange();
-    }
-
-    function restoreEditorSelection() {
-        if (!savedEditorRange) {
-            editor.focus();
-            return;
-        }
-        var selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedEditorRange);
-    }
-
-    function runEditorCommand(command, value) {
-        restoreEditorSelection();
-        document.execCommand(command, false, value || null);
-        rememberEditorSelection();
-        syncEditorContent();
-    }
-
     function formatBytes(bytes) {
         if (bytes < 1024 * 1024) {
             return Math.ceil(bytes / 1024) + ' KB';
@@ -77,6 +53,62 @@ document.addEventListener('DOMContentLoaded', function () {
             transfer.items.add(file);
         });
         files.files = transfer.files;
+    }
+
+    function isSameFile(left, right) {
+        return left.name === right.name
+            && left.size === right.size
+            && left.lastModified === right.lastModified;
+    }
+
+    function appendSelectedFiles(newFiles) {
+        var incomingFiles = Array.from(newFiles);
+        var oversizedFile = incomingFiles.find(function (file) {
+            return file.size > MAX_FILE_SIZE;
+        });
+
+        if (oversizedFile) {
+            syncFileInput();
+            renderFiles();
+            fileMessage.textContent = oversizedFile.name
+                + ' 파일은 10MB를 넘어 첨부할 수 없습니다.';
+            return;
+        }
+
+        var duplicateCount = 0;
+        var filesToAdd = [];
+        incomingFiles.forEach(function (file) {
+            var duplicated = selectedFiles.concat(filesToAdd).some(function (selectedFile) {
+                return isSameFile(selectedFile, file);
+            });
+            if (duplicated) {
+                duplicateCount += 1;
+                return;
+            }
+            filesToAdd.push(file);
+        });
+
+        var remainingCount = MAX_FILE_COUNT - selectedFiles.length;
+        var addedFiles = filesToAdd.slice(0, remainingCount);
+        selectedFiles = selectedFiles.concat(addedFiles);
+        syncFileInput();
+        renderFiles();
+
+        if (filesToAdd.length > remainingCount) {
+            fileMessage.textContent = '첨부파일은 최대 5개입니다. '
+                + addedFiles.length + '개만 추가했습니다.';
+            return;
+        }
+
+        if (duplicateCount > 0) {
+            fileStatus.textContent = addedFiles.length + '개를 추가하고, 이미 첨부된 파일 '
+                + duplicateCount + '개는 제외했습니다.';
+            return;
+        }
+
+        if (addedFiles.length > 0) {
+            fileStatus.textContent = addedFiles.length + '개 파일을 추가했습니다.';
+        }
     }
 
     function clearSelectedFiles(statusMessage) {
@@ -100,24 +132,6 @@ document.addEventListener('DOMContentLoaded', function () {
         fileStatus.textContent = '';
         fileCount.textContent = '첨부파일 ' + selectedFiles.length + '개';
         clearAllFiles.hidden = selectedFiles.length === 0;
-
-        if (selectedFiles.length > 5) {
-            selectedFiles = [];
-            files.value = '';
-            fileCount.textContent = '첨부파일 0개';
-            clearAllFiles.hidden = true;
-            fileMessage.textContent = '첨부파일은 최대 5개까지 선택할 수 있습니다.';
-            return;
-        }
-
-        if (selectedFiles.some(function (file) { return file.size > 10 * 1024 * 1024; })) {
-            selectedFiles = [];
-            files.value = '';
-            fileCount.textContent = '첨부파일 0개';
-            clearAllFiles.hidden = true;
-            fileMessage.textContent = '파일 한 개의 크기는 10MB를 넘을 수 없습니다.';
-            return;
-        }
 
         selectedFiles.forEach(function (file, index) {
             var item = document.createElement('li');
@@ -144,12 +158,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function selectCategoryFromQuery() {
-        var requestedCategory = new URLSearchParams(window.location.search).get('category');
+        var requestedCategory = (new URLSearchParams(window.location.search).get('category') || '')
+            .toLowerCase();
         var categoryMap = {
             praise: 'PRAISE',
             schedule: 'COMPLAINT',
             driving: 'COMPLAINT',
             lost: 'LOST',
+            etc: 'ETC',
             complaint: 'COMPLAINT'
         };
         if (categoryMap[requestedCategory]) {
@@ -162,30 +178,20 @@ document.addEventListener('DOMContentLoaded', function () {
         updateCount(title, titleCount);
     });
     editor.addEventListener('input', syncEditorContent);
-    editor.addEventListener('keyup', rememberEditorSelection);
-    editor.addEventListener('mouseup', rememberEditorSelection);
     editor.addEventListener('paste', function (event) {
         event.preventDefault();
         document.execCommand('insertText', false, event.clipboardData.getData('text/plain'));
     });
-    document.querySelectorAll('[data-editor-command]').forEach(function (button) {
-        button.addEventListener('mousedown', function (event) { event.preventDefault(); });
-        button.addEventListener('click', function () {
-            runEditorCommand(button.dataset.editorCommand);
-        });
-    });
-    editorFont.addEventListener('change', function () {
-        runEditorCommand('fontName', editorFont.value);
-    });
-    editorSize.addEventListener('change', function () {
-        runEditorCommand('fontSize', editorSize.value);
+    editor.addEventListener('beforeinput', function (event) {
+        if (event.inputType && event.inputType.indexOf('format') === 0) {
+            event.preventDefault();
+        }
     });
     category.addEventListener('change', function () {
         category.classList.remove('invalid');
     });
     files.addEventListener('change', function () {
-        selectedFiles = Array.from(files.files);
-        renderFiles();
+        appendSelectedFiles(files.files);
     });
     clearAllFiles.addEventListener('click', function () {
         clearSelectedFiles('모든 첨부파일을 취소했습니다.');
@@ -204,8 +210,25 @@ document.addEventListener('DOMContentLoaded', function () {
         completeConfirm.focus();
     }
 
+    function previousComplaintPageUrl() {
+        var fallbackUrl = appUrl('/complaints');
+        if (!document.referrer) return fallbackUrl;
+
+        try {
+            var referrerUrl = new URL(document.referrer);
+            var complaintListUrl = new URL(fallbackUrl, window.location.origin);
+            var inquiryListUrl = new URL(appUrl('/mypage/inquiries'), window.location.origin);
+            var isComplaintPage = referrerUrl.origin === window.location.origin
+                && [complaintListUrl.pathname, inquiryListUrl.pathname]
+                    .includes(referrerUrl.pathname);
+            return isComplaintPage ? referrerUrl.href : fallbackUrl;
+        } catch (error) {
+            return fallbackUrl;
+        }
+    }
+
     completeConfirm.addEventListener('click', function () {
-        window.location.href = appUrl('/');
+        window.location.href = previousComplaintPageUrl();
     });
 
     form.addEventListener('submit', function (event) {

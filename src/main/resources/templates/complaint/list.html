@@ -25,6 +25,9 @@
 <th:block th:if="${selectedCategory == 'LOST'}">
     <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/lost-property-hero.png', '분실물 문의')}"></section>
 </th:block>
+<th:block th:if="${selectedCategory == 'ETC'}">
+    <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/complaint-write-hero.png', '기타')}"></section>
+</th:block>
 <th:block th:if="${selectedCategory == 'ALL'}">
     <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/complaints-all-hero.png', '고객의 소리')}"></section>
 </th:block>
@@ -32,7 +35,7 @@
 <main id="complaint-board" class="board-page">
     <section class="board-intro" aria-labelledby="board-title">
         <h1 id="board-title">고객의 소리를 들려주세요</h1>
-        <span>칭찬과 불편사항, 분실물 문의를 남겨주시면 담당자가 확인하겠습니다.</span>
+        <span>칭찬과 불편사항, 분실물 및 기타 문의를 남겨주시면 담당자가 확인하겠습니다.</span>
     </section>
 
     <section class="board-card" aria-label="민원 게시판">
@@ -46,6 +49,8 @@
                    th:href="@{/complaints(category='COMPLAINT',keyword=${keyword})}">불편합니다</a>
                 <a th:classappend="${selectedCategory == 'LOST'} ? 'active'"
                    th:href="@{/complaints(category='LOST',keyword=${keyword})}">분실물 문의</a>
+                <a th:classappend="${selectedCategory == 'ETC'} ? 'active'"
+                   th:href="@{/complaints(category='ETC',keyword=${keyword})}">기타</a>
             </nav>
             <form class="board-search" method="get" action="/complaints" th:action="@{/complaints}">
                 <input type="hidden" name="category" th:value="${selectedCategory}">

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채용공고 | (주) 서경 마을버스</title>
+    <link rel="stylesheet" href="../../static/css/recruit.css" th:href="@{/css/recruit.css}">
+    <link rel="stylesheet" href="../../static/css/public-layout.css" th:href="@{/css/public-layout.css}">
+    <script src="../../static/js/public-layout.js" th:src="@{/js/public-layout.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/public-layout :: header}"></header>
+<section th:replace="~{fragments/public-layout :: subHero('/images/subpages/recruit-notices-hero.png', '채용공고')}"></section>
+<main class="recruit-page">
+    <header class="recruit-heading"><p>RECRUIT</p><h1>함께 성장할 인재를 기다립니다</h1><span>채용공고와 접수 일정을 확인하고 온라인으로 지원할 수 있습니다.</span></header>
+    <section class="recruit-board" aria-labelledby="recruit-list-title">
+        <div class="recruit-toolbar">
+            <div><h2 id="recruit-list-title">채용공고</h2><p>총 <strong th:text="${postingPage.totalElements}">0</strong>건</p></div>
+            <form method="get" th:action="@{/recruit/notices}">
+                <label class="sr-only" for="recruit-keyword">채용공고 검색</label>
+                <input id="recruit-keyword" name="keyword" type="search" maxlength="100" th:value="${keyword}" placeholder="검색어를 입력해 주세요.">
+                <button type="submit">검색</button>
+            </form>
+        </div>
+        <div class="recruit-table-wrap">
+            <table>
+                <caption class="sr-only">채용공고 번호, 제목, 접수 기간, 진행상태 목록</caption>
+                <thead><tr><th>No.</th><th>제목</th><th>접수 기간</th><th>진행상태</th></tr></thead>
+                <tbody>
+                <tr th:each="posting : ${postings}">
+                    <td th:text="${posting.postingNo}">1</td>
+                    <td class="recruit-title"><a th:href="@{/recruit/notices/{no}(no=${posting.postingNo})}" th:text="${posting.title}">채용공고 제목</a></td>
+                    <td th:text="${posting.deadline}">2026-12-31</td>
+                    <td><span class="recruit-status" th:classappend="${posting.statusCssClass}" th:text="${posting.statusLabel}">접수중</span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(postings)}"><td colspan="4" class="empty-row">등록된 채용공고가 없습니다.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <nav class="recruit-pagination" th:if="${postingPage.totalPages > 0}" aria-label="채용공고 페이지 이동">
+            <a th:classappend="${postingPage.first} ? 'disabled'" th:href="${postingPage.first} ? '#' : @{/recruit/notices(keyword=${keyword},page=${postingPage.number - 1})}">‹</a>
+            <a th:each="pageNo : ${#numbers.sequence(T(java.lang.Math).max(0, postingPage.number - 4), T(java.lang.Math).min(postingPage.totalPages - 1, postingPage.number + 4))}"
+               th:href="@{/recruit/notices(keyword=${keyword},page=${pageNo})}" th:text="${pageNo + 1}" th:classappend="${pageNo == postingPage.number} ? 'active'">1</a>
+            <a th:classappend="${postingPage.last} ? 'disabled'" th:href="${postingPage.last} ? '#' : @{/recruit/notices(keyword=${keyword},page=${postingPage.number + 1})}">›</a>
+        </nav>
+    </section>
+</main>
+<footer th:replace="~{fragments/public-layout :: footer}"></footer>
+</body>
+</html>

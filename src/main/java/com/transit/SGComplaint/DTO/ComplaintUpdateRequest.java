@@ -8,7 +8,7 @@ public class ComplaintUpdateRequest {
 
     @NotBlank(message = "민원 분류를 선택해 주세요.")
     @Pattern(
-            regexp = "PRAISE|COMPLAINT|LOST",
+            regexp = "PRAISE|COMPLAINT|LOST|ETC",
             message = "올바른 민원 분류를 선택해 주세요.")
     private String category;
 

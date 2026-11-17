@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.mapper.RecruitmentMapper">
+    <resultMap id="postingMap" type="com.transit.SGComplaint.domain.JobPosting">
+        <id property="postingNo" column="posting_no"/>
+        <result property="title" column="posting_title"/>
+        <result property="content" column="posting_content"/>
+        <result property="deadline" column="deadline"/>
+        <result property="alwaysOpen" column="always_open"/>
+        <result property="status" column="posting_status"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="applicationMap" type="com.transit.SGComplaint.domain.JobApplication">
+        <id property="applicationNo" column="application_no"/>
+        <result property="postingNo" column="posting_no"/>
+        <result property="postingTitle" column="posting_title"/>
+        <result property="applicantName" column="applicant_name"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="applicantType" column="applicant_type"/>
+        <result property="memo" column="memo"/>
+        <result property="consented" column="consented"/>
+        <result property="appliedAt" column="applied_at"/>
+    </resultMap>
+
+    <resultMap id="applicationFileMap" type="com.transit.SGComplaint.domain.JobApplicationFile">
+        <id property="fileNo" column="file_no"/>
+        <result property="applicationNo" column="application_no"/>
+        <result property="documentType" column="document_type"/>
+        <result property="originalName" column="original_name"/>
+        <result property="storedName" column="stored_name"/>
+        <result property="filePath" column="file_path"/>
+        <result property="contentType" column="content_type"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <sql id="postingColumns">
+        posting_no, posting_title, posting_content, deadline, always_open, posting_status,
+        created_by, created_at, updated_at
+    </sql>
+
+    <sql id="postingSearch">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                posting_title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="countPostings" resultType="long">
+        SELECT COUNT(*) FROM sgtransit_job_posting
+        <include refid="postingSearch"/>
+    </select>
+
+    <select id="findPostingPage" resultMap="postingMap">
+        SELECT <include refid="postingColumns"/>
+        FROM sgtransit_job_posting
+        <include refid="postingSearch"/>
+        ORDER BY created_at DESC, posting_no DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="findPosting" resultMap="postingMap">
+        SELECT <include refid="postingColumns"/>
+        FROM sgtransit_job_posting WHERE posting_no = #{postingNo}
+    </select>
+
+    <insert id="insertPosting" parameterType="com.transit.SGComplaint.domain.JobPosting"
+            useGeneratedKeys="true" keyProperty="postingNo">
+        INSERT INTO sgtransit_job_posting
+            (posting_title, posting_content, deadline, always_open, posting_status, created_by)
+        VALUES
+            (#{title}, #{content}, #{deadline}, #{alwaysOpen}, #{status}, #{createdBy})
+    </insert>
+
+    <update id="updatePostingStatus">
+        UPDATE sgtransit_job_posting
+        SET posting_status = #{status}, updated_at = CURRENT_TIMESTAMP
+        WHERE posting_no = #{postingNo}
+    </update>
+
+    <update id="updatePosting" parameterType="com.transit.SGComplaint.domain.JobPosting">
+        UPDATE sgtransit_job_posting
+        SET posting_title = #{title},
+            posting_content = #{content},
+            deadline = #{deadline},
+            always_open = #{alwaysOpen},
+            posting_status = #{status},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE posting_no = #{postingNo}
+    </update>
+
+    <delete id="deletePosting">
+        DELETE FROM sgtransit_job_posting
+        WHERE posting_no = #{postingNo}
+    </delete>
+
+    <insert id="insertPostingDocument">
+        INSERT INTO sgtransit_job_posting_document
+            (posting_no, document_type, display_order)
+        VALUES
+            (#{postingNo}, #{documentType}, #{displayOrder})
+    </insert>
+
+    <delete id="deletePostingDocuments">
+        DELETE FROM sgtransit_job_posting_document
+        WHERE posting_no = #{postingNo}
+    </delete>
+
+    <select id="findPostingDocumentTypes" resultType="string">
+        SELECT document_type
+        FROM sgtransit_job_posting_document
+        WHERE posting_no = #{postingNo}
+        ORDER BY display_order, document_type
+    </select>
+
+    <insert id="insertApplication" parameterType="com.transit.SGComplaint.domain.JobApplication"
+            useGeneratedKeys="true" keyProperty="applicationNo">
+        INSERT INTO sgtransit_job_application
+            (posting_no, applicant_name, phone, email, applicant_type, memo, consented)
+        VALUES
+            (#{postingNo}, #{applicantName}, #{phone}, #{email}, #{applicantType}, #{memo}, #{consented})
+    </insert>
+
+    <select id="countApplications" resultType="long">
+        SELECT COUNT(*) FROM sgtransit_job_application WHERE posting_no = #{postingNo}
+    </select>
+
+    <select id="findApplications" resultMap="applicationMap">
+        SELECT a.application_no, a.posting_no, p.posting_title,
+               a.applicant_name, a.phone, a.email, a.applicant_type,
+               a.memo, a.consented, a.applied_at
+        FROM sgtransit_job_application a
+        INNER JOIN sgtransit_job_posting p ON p.posting_no = a.posting_no
+        WHERE a.posting_no = #{postingNo}
+        ORDER BY a.applied_at DESC, a.application_no DESC
+    </select>
+
+    <select id="findApplication" resultMap="applicationMap">
+        SELECT a.application_no, a.posting_no, p.posting_title,
+               a.applicant_name, a.phone, a.email, a.applicant_type,
+               a.memo, a.consented, a.applied_at
+        FROM sgtransit_job_application a
+        INNER JOIN sgtransit_job_posting p ON p.posting_no = a.posting_no
+        WHERE a.application_no = #{applicationNo}
+    </select>
+
+    <insert id="insertApplicationFile" parameterType="com.transit.SGComplaint.domain.JobApplicationFile"
+            useGeneratedKeys="true" keyProperty="fileNo">
+        INSERT INTO sgtransit_job_application_file
+            (application_no, document_type, original_name, stored_name, file_path, content_type, file_size)
+        VALUES
+            (#{applicationNo}, #{documentType}, #{originalName}, #{storedName}, #{filePath}, #{contentType}, #{fileSize})
+    </insert>
+
+    <select id="findApplicationFiles" resultMap="applicationFileMap">
+        SELECT file_no, application_no, document_type, original_name, stored_name,
+               file_path, content_type, file_size, created_at
+        FROM sgtransit_job_application_file
+        WHERE application_no = #{applicationNo}
+        ORDER BY file_no
+    </select>
+</mapper>

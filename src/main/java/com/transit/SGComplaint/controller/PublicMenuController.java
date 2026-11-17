@@ -32,8 +32,7 @@ public class PublicMenuController {
     @GetMapping({
             "/company/history",
             "/company/location",
-            "/company/organization",
-            "/recruit/notices"
+            "/company/organization"
     })
     public String menuPage(HttpServletRequest request, Model model) {
         String title = MENU_TITLES.getOrDefault(request.getServletPath(), "페이지 준비 중");

@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 
 class UploadValidationTests {
     private static final Set<String> ALLOWED = Set.of("jpg", "jpeg", "png", "gif", "webp",
-            "pdf", "doc", "docx", "hwp", "hwpx");
+            "pdf", "doc", "docx", "hwp", "hwpx", "xls", "xlsx", "csv");
     private static final long LIMIT = 10L * 1024 * 1024;
     @TempDir Path root;
 
@@ -119,6 +119,16 @@ class UploadValidationTests {
         byte[] ordinaryZip = archive(Map.of("hello.txt", xml));
         assertThrows(IllegalArgumentException.class, () -> validate("document.docx", ordinaryZip));
         assertThrows(IllegalArgumentException.class, () -> validate("document.hwp", ordinaryZip));
+    }
+
+    @Test void validatesExcelAndCsvByActualFormat() throws Exception {
+        byte[] xml = "<workbook/>".getBytes(StandardCharsets.UTF_8);
+        validate("sheet.xlsx", archive(Map.of("[Content_Types].xml", xml, "xl/workbook.xml", xml)));
+        validate("sheet.csv", "name,phone\n홍길동,010-0000-0000\n".getBytes(StandardCharsets.UTF_8));
+        assertEquals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                UploadValidation.contentType("xlsx"));
+        assertThrows(IllegalArgumentException.class,
+                () -> validate("sheet.csv", new byte[]{'a', ',', 0, 'b'}));
     }
 
     @Test void rejectsArchiveTraversalMacrosAndExpansionBomb() throws Exception {

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${formTitle}">채용공고 등록</title>
+    <link rel="stylesheet" href="../../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <link rel="stylesheet" href="../../../static/css/admin-recruit.css"
+          th:href="@{/css/admin-recruit.css(v='20261110c')}">
+    <script src="../../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+    <script src="../../../static/js/admin-recruitment-form.js"
+            th:src="@{/js/admin-recruitment-form.js(v='20261110c')}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar(${formTitle}, ${formDescription})}"></header>
+        <main class="admin-content">
+            <section class="admin-form-panel recruitment-form-panel">
+                <form method="post" th:action="@{${formAction}}" th:object="${postingRequest}">
+                    <input type="hidden" th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                    <div class="form-errors" th:if="${#fields.hasAnyErrors()}">
+                        <p th:each="error : ${#fields.allErrors()}" th:text="${error}">입력값 오류</p>
+                    </div>
+
+                    <div class="form-grid recruitment-posting-form">
+                        <label class="full">
+                            제목 <b>*</b>
+                            <input type="text" th:field="*{title}" maxlength="150" required
+                                   placeholder="예: 마을버스 운전원 신입/경력 모집">
+                        </label>
+                        <label class="deadline-field" id="deadlineField">
+                            지원 마감일 <b id="deadlineRequiredMark">*</b>
+                            <span class="deadline-input-wrap" id="deadlineInputWrap">
+                                <input type="date" th:field="*{deadline}"
+                                       th:required="${!postingRequest.alwaysOpen}">
+                                <span class="deadline-lock" aria-hidden="true">상시 모집 · 마감일 선택 안 함</span>
+                            </span>
+                        </label>
+                        <div class="posting-toggle-stack">
+                            <label class="active-check">
+                                <input type="checkbox" th:field="*{active}">
+                                <span th:text="${editMode ? '접수 가능한 상태로 공개' : '등록 즉시 접수 시작'}">
+                                    등록 즉시 접수 시작
+                                </span>
+                            </label>
+                            <label class="active-check">
+                                <input type="checkbox" th:field="*{alwaysOpen}">
+                                <span>상시 모집</span>
+                            </label>
+                        </div>
+                        <fieldset class="full posting-document-options">
+                            <legend>지원서에 표시할 제출서류</legend>
+                            <p>체크한 항목만 지원서에 표시됩니다. 이력서는 표시할 경우 필수이며, 채용 후 제출 서류는 안내만 표시됩니다.</p>
+                            <div>
+                                <label class="posting-document-option" th:each="option : ${documentOptions}">
+                                    <input type="checkbox" th:field="*{documentTypes}"
+                                           th:value="${option.code}">
+                                    <span>
+                                        <strong th:text="${option.label}">첨부서류</strong>
+                                        <small th:if="${!#strings.isEmpty(option.description)}"
+                                               th:text="${option.description}">설명</small>
+                                    </span>
+                                </label>
+                            </div>
+                        </fieldset>
+                        <label class="full">
+                            채용공고 내용 <b>*</b>
+                            <textarea th:field="*{content}" maxlength="10000" rows="18" required
+                                      placeholder="담당업무, 지원자격, 근무조건, 전형절차, 문의처를 구분해 입력해 주세요."></textarea>
+                        </label>
+                    </div>
+
+                    <footer class="form-actions">
+                        <a th:href="@{/admin/recruitments}">취소</a>
+                        <button type="submit" th:text="${submitLabel}">채용공고 등록</button>
+                    </footer>
+                </form>
+            </section>
+        </main>
+    </div>
+</div>
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

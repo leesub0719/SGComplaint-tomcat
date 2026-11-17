@@ -46,6 +46,7 @@
                         <option value="PRAISE" th:selected="${selectedCategory == 'PRAISE'}">칭찬합니다</option>
                         <option value="COMPLAINT" th:selected="${selectedCategory == 'COMPLAINT'}">불편합니다</option>
                         <option value="LOST" th:selected="${selectedCategory == 'LOST'}">분실물 문의</option>
+                        <option value="ETC" th:selected="${selectedCategory == 'ETC'}">기타</option>
                     </select>
                     <p class="field-help">접수하려는 내용과 가장 가까운 분류를 선택해 주세요.</p>
                 </div>
@@ -74,29 +75,7 @@
                     <span><strong id="content-count">0</strong>/2000</span>
                 </div>
                 <div class="editor-shell">
-                    <div class="editor-toolbar" role="toolbar" aria-label="본문 서식 도구">
-                        <select id="editor-font" aria-label="글꼴">
-                            <option value="Malgun Gothic">맑은 고딕</option>
-                            <option value="Arial">Arial</option>
-                            <option value="Georgia">Georgia</option>
-                            <option value="Verdana">Verdana</option>
-                        </select>
-                        <select id="editor-size" aria-label="글자 크기">
-                            <option value="2">작게</option>
-                            <option value="3" selected>보통</option>
-                            <option value="4">크게</option>
-                            <option value="5">매우 크게</option>
-                        </select>
-                        <span class="toolbar-divider" aria-hidden="true"></span>
-                        <button type="button" data-editor-command="bold" title="굵게"><strong>B</strong></button>
-                        <button type="button" data-editor-command="italic" title="기울임"><em>I</em></button>
-                        <button type="button" data-editor-command="underline" title="밑줄"><u>U</u></button>
-                        <span class="toolbar-divider" aria-hidden="true"></span>
-                        <button type="button" data-editor-command="insertUnorderedList" title="글머리 목록">• 목록</button>
-                        <button type="button" data-editor-command="insertOrderedList" title="번호 목록">1. 목록</button>
-                        <button type="button" data-editor-command="removeFormat" title="서식 지우기">서식 지우기</button>
-                    </div>
-                    <div id="complaint-editor" class="complaint-editor" contenteditable="true"
+                    <div id="complaint-editor" class="complaint-editor" contenteditable="plaintext-only"
                          role="textbox" aria-multiline="true"
                          data-placeholder="발생 일시, 버스 노선, 차량번호, 정류장, 상황 등을 자세히 작성해 주세요."></div>
                     <textarea id="complaint-content" name="content" hidden></textarea>

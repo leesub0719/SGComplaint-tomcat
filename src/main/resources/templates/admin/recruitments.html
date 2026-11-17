@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채용관리</title>
+    <link rel="stylesheet" href="../../static/css/admin.css" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" href="../../static/css/admin-brand.css" th:href="@{/css/admin-brand.css}">
+    <link rel="stylesheet" href="../../static/css/admin-recruit.css" th:href="@{/css/admin-recruit.css}">
+    <script src="../../static/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+</head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments :: sidebar(${activeMenu})}"></aside>
+    <div class="admin-workspace">
+        <header th:replace="~{admin/fragments :: topbar('채용관리', '채용공고를 등록하고 지원 현황을 관리합니다.')}"></header>
+        <main class="admin-content">
+            <div class="flash-message success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-message error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+            <section class="admin-panel recruit-admin-panel">
+                <div class="panel-heading recruit-admin-heading">
+                    <div>
+                        <h2>채용공고 목록</h2>
+                        <p>공고별 지원 현황과 접수 상태를 확인할 수 있습니다.</p>
+                    </div>
+                    <a class="admin-primary-button" th:href="@{/admin/recruitments/new}">＋ 채용공고 등록</a>
+                </div>
+
+                <form class="recruit-admin-search" method="get" th:action="@{/admin/recruitments}">
+                    <label class="sr-only" for="keyword">공고 검색</label>
+                    <input id="keyword" name="keyword" type="search" maxlength="100"
+                           th:value="${keyword}" placeholder="채용공고 제목 검색">
+                    <button type="submit">검색</button>
+                    <a th:href="@{/admin/recruitments}">초기화</a>
+                </form>
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table recruit-admin-table">
+                        <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>제목</th>
+                            <th>접수 기간</th>
+                            <th>상태</th>
+                            <th>지원자</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="posting : ${postings}">
+                            <td th:text="${posting.postingNo}">1</td>
+                            <td>
+                                <a class="recruit-admin-title" target="_blank"
+                                   th:href="@{/recruit/notices/{no}(no=${posting.postingNo})}"
+                                   th:text="${posting.title}">제목</a>
+                            </td>
+                            <td th:text="${posting.deadline}">2026-12-31</td>
+                            <td>
+                                <span class="recruit-admin-status"
+                                      th:classappend="${posting.statusCssClass}"
+                                      th:text="${posting.statusLabel}">접수중</span>
+                            </td>
+                            <td>
+                                <a class="application-count"
+                                   th:href="@{/admin/recruitments/{no}/applications(no=${posting.postingNo})}">
+                                    지원자 <b th:text="${posting.applicationCount}">0</b>명
+                                </a>
+                            </td>
+                            <td>
+                                <div class="recruitment-row-actions">
+                                    <form method="post"
+                                          th:action="@{/admin/recruitments/{no}/status(no=${posting.postingNo})}">
+                                        <input type="hidden" th:if="${_csrf != null}"
+                                               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <input type="hidden" name="active"
+                                               th:value="${posting.statusCssClass == 'closed'}">
+                                        <button class="status-button" type="submit"
+                                                th:text="${posting.statusCssClass == 'open' ? '접수 마감' : '접수 재개'}">
+                                            접수 마감
+                                        </button>
+                                    </form>
+
+                                    <a class="recruitment-edit-button"
+                                       th:href="@{/admin/recruitments/{no}/edit(no=${posting.postingNo})}">수정</a>
+
+                                    <form th:if="${posting.applicationCount == 0}" method="post"
+                                          th:action="@{/admin/recruitments/{no}/delete(no=${posting.postingNo})}"
+                                          onsubmit="return confirm('이 채용공고를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.');">
+                                        <input type="hidden" th:if="${_csrf != null}"
+                                               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <button class="recruitment-delete-button" type="submit">삭제</button>
+                                    </form>
+
+                                    <button th:unless="${posting.applicationCount == 0}"
+                                            class="recruitment-delete-button" type="button" disabled
+                                            title="지원자가 있는 공고는 삭제할 수 없습니다.">삭제 불가</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(postings)}">
+                            <td colspan="6" class="table-empty">등록된 채용공고가 없습니다.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="admin-pagination" th:if="${postingPage.totalPages > 0}">
+                    <a th:classappend="${postingPage.first} ? 'disabled'"
+                       th:href="${postingPage.first} ? '#' : @{/admin/recruitments(keyword=${keyword},page=${postingPage.number - 1})}">이전</a>
+                    <a th:each="p : ${#numbers.sequence(0, postingPage.totalPages - 1)}"
+                       th:href="@{/admin/recruitments(keyword=${keyword},page=${p})}"
+                       th:text="${p + 1}"
+                       th:classappend="${p == postingPage.number} ? 'active'">1</a>
+                    <a th:classappend="${postingPage.last} ? 'disabled'"
+                       th:href="${postingPage.last} ? '#' : @{/admin/recruitments(keyword=${keyword},page=${postingPage.number + 1})}">다음</a>
+                </nav>
+            </section>
+        </main>
+    </div>
+</div>
+<div class="sidebar-overlay" hidden></div>
+</body>
+</html>

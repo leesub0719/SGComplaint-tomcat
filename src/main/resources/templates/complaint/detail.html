@@ -22,6 +22,9 @@
 <th:block th:if="${complaint.categoryCode == 'LOST'}">
     <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/lost-property-detail-hero.png', '분실물 문의')}"></section>
 </th:block>
+<th:block th:if="${complaint.categoryCode == 'ETC'}">
+    <section th:replace="~{fragments/public-layout :: subHero('/images/subpages/complaint-write-hero.png', '기타')}"></section>
+</th:block>
 <main class="detail-page">
     <article class="detail-card">
         <div class="detail-labels">
@@ -81,6 +84,7 @@
                     <option value="PRAISE" th:selected="${complaint.categoryCode == 'PRAISE'}">칭찬합니다</option>
                     <option value="COMPLAINT" th:selected="${complaint.categoryCode == 'COMPLAINT'}">불편합니다</option>
                     <option value="LOST" th:selected="${complaint.categoryCode == 'LOST'}">분실물 문의</option>
+                    <option value="ETC" th:selected="${complaint.categoryCode == 'ETC'}">기타</option>
                 </select>
                 <label for="detail-edit-title">제목</label>
                 <input id="detail-edit-title" th:value="${complaint.title}" maxlength="100" required>

@@ -59,7 +59,7 @@ public class ComplaintController {
         // Resolve the deferred token before the response can be committed.
         csrfToken.getToken();
         String normalizedCategory = switch (category.toUpperCase()) {
-            case "PRAISE", "COMPLAINT", "LOST" -> category.toUpperCase();
+            case "PRAISE", "COMPLAINT", "LOST", "ETC" -> category.toUpperCase();
             default -> "ALL";
         };
         Page<PublicComplaintItem> complaintPage =
@@ -71,10 +71,12 @@ public class ComplaintController {
             case "PRAISE" -> "칭찬합니다";
             case "COMPLAINT" -> "불편합니다";
             case "LOST" -> "분실물 문의";
+            case "ETC" -> "기타";
             default -> "전체 민원";
         });
         model.addAttribute("keyword", keyword);
         return "complaint/list";
+
     }
 
     @PostMapping("/{complaintNo}/verify")
@@ -187,21 +189,25 @@ public class ComplaintController {
         model.addAttribute("formTitle", switch (selectedCategory) {
             case "PRAISE" -> "칭찬합니다 글쓰기";
             case "LOST" -> "분실물 문의 글쓰기";
+            case "ETC" -> "기타 문의 글쓰기";
             default -> "불편합니다 글쓰기";
         });
         model.addAttribute("formDescription", switch (selectedCategory) {
             case "PRAISE" -> "친절한 기사님과 기분 좋았던 버스 이용 경험을 들려주세요.";
             case "LOST" -> "버스에서 잃어버린 물건과 이용 정보를 자세히 작성해 주세요.";
+            case "ETC" -> "그 밖의 문의사항이나 전달할 내용을 자세히 작성해 주세요.";
             default -> "버스 이용 중 겪은 불편 사항이나 개선 의견을 자세히 작성해 주세요.";
         });
         model.addAttribute("formHeroImage", switch (selectedCategory) {
             case "PRAISE" -> "/images/subpages/praise-hero.png";
             case "LOST" -> "/images/subpages/lost-property-hero.png";
+            case "ETC" -> "/images/subpages/complaint-write-hero.png";
             default -> "/images/subpages/inconvenience-hero.png";
         });
         model.addAttribute("titlePlaceholder", switch (selectedCategory) {
             case "PRAISE" -> "예시) 013-1 노선차량 오전 기사님을 칭찬하고 싶어요";
             case "LOST" -> "분실물 제목을 입력해 주세요";
+            case "ETC" -> "문의 제목을 입력해 주세요";
             default -> "예시) 013-1 노선개선일 필요해보여요";
         });
         return "complaint/create";
@@ -212,6 +218,7 @@ public class ComplaintController {
         return switch (category.trim().toUpperCase()) {
             case "PRAISE" -> "PRAISE";
             case "LOST" -> "LOST";
+            case "ETC" -> "ETC";
             default -> "COMPLAINT";
         };
     }

@@ -255,7 +255,7 @@ public class ComplaintService {
     private String normalizePublicCategory(String category) {
         if (!StringUtils.hasText(category) || "ALL".equalsIgnoreCase(category)) return "";
         String normalized = category.trim().toUpperCase(Locale.ROOT);
-        if (!Set.of("PRAISE", "COMPLAINT", "LOST").contains(normalized)) return "";
+        if (!Set.of("PRAISE", "COMPLAINT", "LOST", "ETC").contains(normalized)) return "";
         return normalized;
     }
 
@@ -264,6 +264,7 @@ public class ComplaintService {
             case "PRAISE" -> "칭찬합니다";
             case "COMPLAINT", "DRIVER", "BUS" -> "불편합니다";
             case "LOST", "GENERAL" -> "분실물 문의";
+            case "ETC" -> "기타";
             default -> "기타";
         };
     }
@@ -273,6 +274,7 @@ public class ComplaintService {
             case "PRAISE" -> "PRAISE";
             case "COMPLAINT", "DRIVER", "BUS" -> "COMPLAINT";
             case "LOST", "GENERAL" -> "LOST";
+            case "ETC" -> "ETC";
             default -> "COMPLAINT";
         };
     }

@@ -11,7 +11,7 @@ import java.util.List;
 public class ComplaintCreateRequest {
 
     @NotBlank(message = "민원 분류를 선택해 주세요.")
-    @Pattern(regexp = "PRAISE|COMPLAINT|LOST", message = "올바른 민원 분류를 선택해 주세요.")
+    @Pattern(regexp = "PRAISE|COMPLAINT|LOST|ETC", message = "올바른 민원 분류를 선택해 주세요.")
     private String category;
 
     @NotBlank(message = "제목을 입력해 주세요.")

@@ -60,6 +60,9 @@ public final class UploadValidation {
             case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
             case "hwp" -> "application/x-hwp";
             case "hwpx" -> "application/hwp+zip";
+            case "xls" -> "application/vnd.ms-excel";
+            case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "csv" -> "text/csv";
             default -> throw invalid("허용하지 않는 파일 형식입니다.");
         };
     }
@@ -94,8 +97,9 @@ public final class UploadValidation {
                             throw invalid("PDF 파일 형식이 올바르지 않습니다.");
                         }
                     }
-                    case "doc", "hwp" -> validateCompoundDocument(bytes, extension);
-                    case "docx", "hwpx" -> validateArchive(bytes, extension);
+                    case "doc", "hwp", "xls" -> validateCompoundDocument(bytes, extension);
+                    case "docx", "hwpx", "xlsx" -> validateArchive(bytes, extension);
+                    case "csv" -> validateCsv(bytes);
                     default -> throw invalid("허용하지 않는 파일 형식입니다.");
                 }
             }
@@ -189,12 +193,17 @@ public final class UploadValidation {
                 (byte) 0xa1, (byte) 0xb1, 0x1a, (byte) 0xe1};
         if (bytes.length < 512 || !Arrays.equals(Arrays.copyOf(bytes, 8), magic)
                 || u16(bytes, 28) != 0xfffe || (u16(bytes, 30) != 9 && u16(bytes, 30) != 12)) {
-            throw invalid("DOC/HWP 문서 헤더가 올바르지 않습니다.");
+            throw invalid("복합 문서 헤더가 올바르지 않습니다.");
         }
         // Basic container identification only, not execution or full document parsing.
         String container = new String(bytes, StandardCharsets.UTF_16LE);
-        if ("doc".equals(extension) ? !container.contains("WordDocument")
-                : !(container.contains("FileHeader") && container.contains("BodyText"))) {
+        boolean valid = switch (extension) {
+            case "doc" -> container.contains("WordDocument");
+            case "hwp" -> container.contains("FileHeader") && container.contains("BodyText");
+            case "xls" -> container.contains("Workbook") || container.contains("Book");
+            default -> false;
+        };
+        if (!valid) {
             throw invalid("확장자와 문서 컨테이너 형식이 다릅니다.");
         }
     }
@@ -252,12 +261,46 @@ public final class UploadValidation {
                 zip.closeEntry();
             }
         }
-        boolean valid = "docx".equals(extension)
-                ? names.contains("[Content_Types].xml") && names.contains("word/document.xml")
-                : names.contains("Contents/content.hpf") && names.contains("Contents/section0.xml")
+        boolean valid = switch (extension) {
+            case "docx" -> names.contains("[Content_Types].xml") && names.contains("word/document.xml");
+            case "xlsx" -> names.contains("[Content_Types].xml") && names.contains("xl/workbook.xml");
+            case "hwpx" -> names.contains("Contents/content.hpf") && names.contains("Contents/section0.xml")
                     && mimetype.equals("application/hwp+zip");
+            default -> false;
+        };
         if (!valid || names.size() != expectedEntries) {
             throw invalid("확장자와 압축 문서 내부 형식이 다르거나 문서가 손상되었습니다.");
+        }
+    }
+
+    private static void validateCsv(byte[] bytes) {
+        if (bytes.length == 0) throw invalid("빈 CSV 파일은 첨부할 수 없습니다.");
+        for (byte value : bytes) {
+            int unsigned = value & 255;
+            if (unsigned == 0 || (unsigned < 32 && unsigned != '\r' && unsigned != '\n' && unsigned != '\t')) {
+                throw invalid("CSV 파일에 허용하지 않는 제어 문자가 포함되어 있습니다.");
+            }
+        }
+        boolean decoded = canDecode(bytes, StandardCharsets.UTF_8);
+        if (!decoded) {
+            try {
+                decoded = canDecode(bytes, java.nio.charset.Charset.forName("MS949"));
+            } catch (RuntimeException ignored) {
+                decoded = false;
+            }
+        }
+        if (!decoded) throw invalid("CSV 파일은 UTF-8 또는 MS949 문자 인코딩이어야 합니다.");
+    }
+
+    private static boolean canDecode(byte[] bytes, java.nio.charset.Charset charset) {
+        try {
+            charset.newDecoder()
+                    .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                    .decode(java.nio.ByteBuffer.wrap(bytes));
+            return true;
+        } catch (java.nio.charset.CharacterCodingException exception) {
+            return false;
         }
     }
 
