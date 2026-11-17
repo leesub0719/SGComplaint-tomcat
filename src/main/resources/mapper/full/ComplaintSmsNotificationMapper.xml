@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.transit.SGComplaint.mapper.ComplaintSmsNotificationMapper">
+
+    <resultMap id="notification" type="com.transit.SGComplaint.domain.ComplaintSmsNotification">
+        <id property="notificationNo" column="notification_no"/>
+        <result property="complaintNo" column="complaint_no"/>
+        <result property="notificationType" column="notification_type"/>
+        <result property="recipientPhone" column="recipient_phone"/>
+        <result property="messageText" column="message_text"/>
+        <result property="sendStatus" column="send_status"/>
+        <result property="attemptCount" column="attempt_count"/>
+        <result property="lastError" column="last_error"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="sentAt" column="sent_at"/>
+    </resultMap>
+
+    <insert id="insertIfAbsent" useGeneratedKeys="true"
+            keyProperty="notificationNo" keyColumn="notification_no">
+        INSERT IGNORE INTO sgtransit_complaint_sms_notification (
+            complaint_no, notification_type, recipient_phone,
+            message_text, send_status, attempt_count
+        ) VALUES (
+            #{complaintNo}, #{notificationType}, #{recipientPhone},
+            #{messageText}, 'PENDING', 0
+        )
+    </insert>
+
+    <select id="findById" resultMap="notification">
+        SELECT *
+        FROM sgtransit_complaint_sms_notification
+        WHERE notification_no=#{notificationNo}
+    </select>
+
+    <select id="findRetryCandidates" resultType="long">
+        SELECT notification_no
+        FROM sgtransit_complaint_sms_notification
+        WHERE send_status IN ('PENDING', 'FAILED')
+          AND attempt_count &lt; 3
+        ORDER BY created_at, notification_no
+        LIMIT #{limit}
+    </select>
+
+    <update id="claim">
+        UPDATE sgtransit_complaint_sms_notification
+        SET send_status='SENDING',
+            attempt_count=attempt_count+1,
+            updated_at=CURRENT_TIMESTAMP
+        WHERE notification_no=#{notificationNo}
+          AND send_status IN ('PENDING', 'FAILED')
+          AND attempt_count &lt; 3
+    </update>
+
+    <update id="markSent">
+        UPDATE sgtransit_complaint_sms_notification
+        SET send_status='SENT',
+            last_error=NULL,
+            sent_at=CURRENT_TIMESTAMP,
+            updated_at=CURRENT_TIMESTAMP
+        WHERE notification_no=#{notificationNo}
+    </update>
+
+    <update id="markFailed">
+        UPDATE sgtransit_complaint_sms_notification
+        SET send_status='FAILED',
+            last_error=#{lastError},
+            updated_at=CURRENT_TIMESTAMP
+        WHERE notification_no=#{notificationNo}
+    </update>
+
+    <update id="recoverStaleSending">
+        UPDATE sgtransit_complaint_sms_notification
+        SET send_status='FAILED',
+            last_error='발송 처리 중 애플리케이션이 중단되어 재시도합니다.',
+            updated_at=CURRENT_TIMESTAMP
+        WHERE send_status='SENDING'
+          AND updated_at &lt; #{cutoff}
+    </update>
+
+</mapper>

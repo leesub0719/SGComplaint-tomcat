@@ -19,6 +19,22 @@ public class SolapiSmsSender implements SmsSender {
 
     @Override
     public void sendVerificationCode(String phone, String code) {
+        send(
+                phone,
+                "[(주) 서경 마을버스] 휴대전화 인증번호는 ["
+                        + code + "]입니다. 3분 안에 입력해 주세요.",
+                "인증번호 문자 발송에 실패했습니다.");
+    }
+
+    @Override
+    public void sendMessage(String phone, String text) {
+        if (!StringUtils.hasText(text)) {
+            throw new SmsSendException("발송할 문자 내용이 없습니다.");
+        }
+        send(phone, text.trim(), "문자 발송에 실패했습니다.");
+    }
+
+    private void send(String phone, String text, String failureMessage) {
         SmsProperties.Solapi solapi = properties.getSolapi();
 
         if (!StringUtils.hasText(solapi.getApiKey())
@@ -35,15 +51,12 @@ public class SolapiSmsSender implements SmsSender {
 
             Message message = new Message();
             message.setFrom(PhoneNumberUtils.digitsOnly(solapi.getSender()));
-            message.setTo(phone);
-            message.setText(
-                    "[(주) 서경 마을버스] 휴대전화 인증번호는 ["
-                    + code + "]입니다. 3분 안에 입력해 주세요.");
+            message.setTo(PhoneNumberUtils.normalize(phone));
+            message.setText(text);
 
             messageService.send(message);
         } catch (Exception exception) {
-            throw new SmsSendException(
-                    "인증번호 문자 발송에 실패했습니다.", exception);
+            throw new SmsSendException(failureMessage, exception);
         }
     }
 }
